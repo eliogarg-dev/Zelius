@@ -1,0 +1,29 @@
+{
+  "name": "zapp",
+  "version": "0.1.0",
+  "description": "Paroliere tra amici: app Android e versione browser",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run",
+    "dizionario": "node --max-old-space-size=6000 scripts/prepara-dizionario.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eliogarg-dev/Zapp.git"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.1.1",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/node": "^24.19.2",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.7",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.5",
+    "vitest": "^3.2.7"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+data/raw/
+data/parole.txt
+.firebase/
+*.log
+.DS_Store
+android/app/build/
+android/.gradle/
