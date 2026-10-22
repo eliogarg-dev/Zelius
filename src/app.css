@@ -1,0 +1,214 @@
+/* Colori dei mockup: tema scuro (predefinito) e chiaro. */
+:root,
+:root[data-theme='scuro'] {
+  --bg: #111318;
+  --surf: #1b1e26;
+  --surf2: #232733;
+  --line: #2e3340;
+  --text: #f2f3f7;
+  --muted: #a0a6b5;
+  --acc: #7aa2ff;
+  --on-acc: #0e1220;
+  --warm: #ffb547;
+  --warm-bg: #ffb547;
+  --on-warm: #1a1206;
+  --danger: #ff8a80;
+  --ok: #7ee2a8;
+  --dash: #4a5060;
+  --soft: #c4c9d4;
+  --me: #22304f;
+  --path: #ffb547;
+  color-scheme: dark;
+}
+
+:root[data-theme='chiaro'] {
+  --bg: #f5f6f8;
+  --surf: #ffffff;
+  --surf2: #e9ecf2;
+  --line: #d5d9e2;
+  --text: #14161c;
+  --muted: #5a6070;
+  --acc: #3a63d8;
+  --on-acc: #ffffff;
+  --warm: #a15c00;
+  --warm-bg: #ffb547;
+  --on-warm: #1a1206;
+  --danger: #c2362b;
+  --ok: #1e7a45;
+  --dash: #9aa1b0;
+  --soft: #3a3f4b;
+  --me: #e1e9fb;
+  --path: #ff9f1a;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+:focus-visible {
+  outline: 3px solid var(--acc);
+  outline-offset: 2px;
+}
+
+.display {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 700;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Pulsanti */
+.btn {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--surf);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primario {
+  min-height: 56px;
+  border-radius: 28px;
+  border: 0;
+  background: var(--acc);
+  color: var(--on-acc);
+  font-size: 17px;
+  width: 100%;
+}
+
+.btn-testo {
+  min-height: 44px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--acc);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.btn-icona {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: var(--surf);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scelta tra poche opzioni (griglia, durata, tema...) */
+.segmenti {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: 24px;
+  background: var(--surf2);
+}
+
+.segmenti button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.segmenti button[aria-pressed='true'] {
+  background: var(--surf);
+  color: var(--text);
+}
+
+.campo {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surf);
+  font-size: 17px;
+}
+
+.etichetta {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.scheda {
+  background: var(--surf);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.solo-lettori {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

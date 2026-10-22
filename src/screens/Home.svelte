@@ -1,0 +1,101 @@
+<script lang="ts">
+  import Icona from '../components/Icona.svelte';
+
+  let {
+    onallenati,
+    oncrea,
+    onentra,
+    onimpostazioni,
+    stanzeDisponibili,
+  }: {
+    onallenati: () => void;
+    oncrea: () => void;
+    onentra: () => void;
+    onimpostazioni: () => void;
+    stanzeDisponibili: boolean;
+  } = $props();
+</script>
+
+<div class="testa">
+  <button type="button" class="btn-icona" aria-label="Impostazioni" onclick={onimpostazioni}>
+    <Icona nome="impostazioni" />
+  </button>
+</div>
+
+<div class="logo" aria-label="Zapp" role="img">
+  {#each ['Z', 'A', 'P', 'P'] as l, i (i)}
+    <span class="display" style:--i={i}>{l}</span>
+  {/each}
+</div>
+<p class="sottotitolo muted">Il Paroliere da giocare insieme</p>
+
+<div class="azioni">
+  <button type="button" class="btn btn-primario" onclick={onallenati}>Allenati da solo</button>
+  <button type="button" class="btn grande" onclick={oncrea} disabled={!stanzeDisponibili}>Crea una stanza</button>
+  <button type="button" class="btn grande" onclick={onentra} disabled={!stanzeDisponibili}>Entra in una stanza</button>
+  {#if !stanzeDisponibili}
+    <p class="muted nota">Le stanze arrivano nella prossima versione.</p>
+  {/if}
+</div>
+
+<style>
+  .testa {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .logo {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    padding: 10px;
+    background: var(--surf);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+  }
+
+  .logo span {
+    aspect-ratio: 1;
+    border-radius: 16px;
+    background: var(--acc);
+    color: var(--on-acc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    animation: entra 500ms calc(var(--i) * 90ms) both ease-out;
+  }
+
+  @keyframes entra {
+    from {
+      transform: translateY(16px) scale(0.8);
+      opacity: 0;
+    }
+  }
+
+  .sottotitolo {
+    text-align: center;
+    margin: 16px 0 0;
+    font-size: 16px;
+  }
+
+  .azioni {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .grande {
+    min-height: 56px;
+    border-radius: 28px;
+    font-size: 17px;
+  }
+
+  .nota {
+    text-align: center;
+    font-size: 14px;
+    margin: 4px 0 0;
+  }
+</style>

@@ -4,7 +4,7 @@ import { inParola, inSimboli, numeroLettere, normalizza, etichettaCasella, SIMBO
 import { costruisciDawg, Dizionario } from '../src/lib/game/dawg.ts';
 import { punti, puntiPerLunghezza } from '../src/lib/game/punteggio.ts';
 import { adiacenze, percorsoValido, trovaParole, trovaPercorso } from '../src/lib/game/risolutore.ts';
-import { casualeConSeme, generaGriglia, preparaMano } from '../src/lib/game/griglia.ts';
+import { casualeConSeme, generaGriglia, MAX_RIPETIZIONI, preparaMano } from '../src/lib/game/griglia.ts';
 
 // Griglia dei mockup:
 //   C  A  R  T
@@ -110,6 +110,17 @@ describe('griglia', () => {
   it('con lo stesso seme genera la stessa griglia', () => {
     expect(generaGriglia(5, casualeConSeme(42))).toEqual(generaGriglia(5, casualeConSeme(42)));
     expect(generaGriglia(4, casualeConSeme(1))).toHaveLength(16);
+  });
+
+  it('non ripete troppo la stessa lettera e ha al massimo un Qu', () => {
+    for (let seme = 0; seme < 300; seme++) {
+      for (const lato of [4, 5] as const) {
+        const conteggi = new Map<number, number>();
+        for (const s of generaGriglia(lato, casualeConSeme(seme))) conteggi.set(s, (conteggi.get(s) ?? 0) + 1);
+        expect(Math.max(...conteggi.values())).toBeLessThanOrEqual(MAX_RIPETIZIONI[lato]);
+        expect(conteggi.get(SIMBOLO_QU) ?? 0).toBeLessThanOrEqual(1);
+      }
+    }
   });
 });
 
