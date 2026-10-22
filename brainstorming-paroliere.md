@@ -3,7 +3,7 @@
 Ultimo aggiornamento: 2026-10-22. Nessun codice scritto: siamo ancora nella fase di definizione.
 
 **Per riprendere con Claude:** apri la cartella `Zapp` in Claude Code e scrivi:
-"Leggi brainstorming-paroliere.md e paroliere-design.md e continuiamo da dove eravamo rimasti."
+"Leggi STATO-LAVORI.md, paroliere-design.md e brainstorming-paroliere.md e continuiamo l'implementazione."
 
 ---
 

@@ -1,0 +1,129 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "stanze": {
+      "$c": {
+        ".write": "auth != null && data.child('meta/host').val() === auth.uid && !newData.exists()",
+
+        "meta": {
+          ".read": "auth != null",
+          ".write": "auth != null && ((!data.exists() && newData.child('host').val() === auth.uid) || (data.exists() && data.child('host').val() === auth.uid))",
+          ".validate": "newData.hasChildren(['host', 'creata', 'stato'])",
+          "host": {
+            ".write": "auth != null && newData.val() === auth.uid && root.child('stanze').child($c).child('giocatori').child(auth.uid).child('via').val() === 'app' && root.child('stanze').child($c).child('giocatori').child(data.val()).child('online').val() === false",
+            ".validate": "newData.isString()"
+          },
+          "creata": { ".validate": "newData.isNumber()" },
+          "stato": { ".validate": "newData.val() === 'attesa' || newData.val() === 'gioco'" },
+          "mano": { ".validate": "newData.isNumber() && newData.val() >= 1" },
+          "$altro": { ".validate": false }
+        },
+
+        "impostazioni": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid",
+          ".validate": "newData.hasChildren(['lato', 'durata', 'minLettere'])",
+          "lato": { ".validate": "newData.val() === 4 || newData.val() === 5" },
+          "durata": { ".validate": "newData.val() === 60 || newData.val() === 120 || newData.val() === 180" },
+          "minLettere": { ".validate": "newData.val() === 4 || newData.val() === 5 || newData.val() === 6" },
+          "$altro": { ".validate": false }
+        },
+
+        "giocatori": {
+          ".read": "auth != null && (data.child(auth.uid).exists() || root.child('stanze').child($c).child('meta/host').val() === auth.uid)",
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid",
+            ".validate": "newData.hasChildren(['nome', 'via', 'entrato', 'online'])",
+            "nome": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+            "via": { ".validate": "newData.val() === 'app' || newData.val() === 'web'" },
+            "entrato": { ".validate": "newData.isNumber()" },
+            "online": {
+              ".write": "auth != null && auth.uid === $uid && data.exists()",
+              ".validate": "newData.isBoolean()"
+            },
+            "$altro": { ".validate": false }
+          }
+        },
+
+        "richieste": {
+          ".read": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid",
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && ((root.child('stanze').child($c).child('meta/host').val() === auth.uid && !newData.exists()) || (auth.uid === $uid && (!newData.exists() || (root.child('stanze').child($c).child('meta').exists() && !root.child('stanze').child($c).child('bloccati').child($uid).exists() && !root.child('stanze').child($c).child('giocatori').child($uid).exists()))))",
+            ".validate": "newData.hasChildren(['nome', 'via', 'at'])",
+            "nome": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+            "via": { ".validate": "newData.val() === 'app' || newData.val() === 'web'" },
+            "at": { ".validate": "newData.isNumber()" },
+            "$altro": { ".validate": false }
+          }
+        },
+
+        "rifiutati": {
+          "$uid": {
+            ".read": "auth != null && (auth.uid === $uid || root.child('stanze').child($c).child('meta/host').val() === auth.uid)",
+            ".write": "auth != null && (root.child('stanze').child($c).child('meta/host').val() === auth.uid || (auth.uid === $uid && !newData.exists()))",
+            ".validate": "newData.isNumber()"
+          }
+        },
+
+        "bloccati": {
+          ".read": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid",
+          "$uid": {
+            ".read": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid",
+            ".validate": "newData.val() === true"
+          }
+        },
+
+        "mani": {
+          ".read": "auth != null && root.child('stanze').child($c).child('giocatori').child(auth.uid).exists()",
+          "$n": {
+            ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid",
+            ".validate": "newData.hasChildren(['griglia', 'inizio', 'fine', 'sale', 'impronte', 'minLettere'])"
+          }
+        },
+
+        "soluzioni": {
+          "$n": {
+            ".read": "auth != null && root.child('stanze').child($c).child('giocatori').child(auth.uid).exists() && now > root.child('stanze').child($c).child('mani').child($n).child('fine').val()",
+            ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid",
+            ".validate": "newData.isString()"
+          }
+        },
+
+        "parole": {
+          "$n": {
+            ".read": "auth != null && root.child('stanze').child($c).child('giocatori').child(auth.uid).exists() && now > root.child('stanze').child($c).child('mani').child($n).child('fine').val()",
+            "$uid": {
+              ".read": "auth != null && auth.uid === $uid",
+              "$parola": {
+                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('stanze').child($c).child('giocatori').child($uid).child('entrato').val() <= root.child('stanze').child($c).child('mani').child($n).child('inizio').val() && now >= root.child('stanze').child($c).child('mani').child($n).child('inizio').val() && now <= root.child('stanze').child($c).child('mani').child($n).child('fine').val() + 3000",
+                ".validate": "newData.val() === true && $parola.matches(/^[A-Z]{3,30}$/)"
+              }
+            }
+          }
+        },
+
+        "risultati": {
+          ".read": "auth != null && root.child('stanze').child($c).child('giocatori').child(auth.uid).exists()",
+          "$n": {
+            ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid && !data.exists()",
+            ".validate": "newData.hasChildren(['punti', 'totali'])"
+          }
+        },
+
+        "$altro": { ".validate": false }
+      }
+    },
+
+    "segnalazioni": {
+      "$id": {
+        ".write": "auth != null && !data.exists()",
+        ".validate": "newData.hasChildren(['parola', 'griglia', 'at', 'uid']) && newData.child('uid').val() === auth.uid && newData.child('parola').isString() && newData.child('parola').val().length <= 30"
+      }
+    }
+  }
+}

@@ -7,3 +7,4 @@ data/parole.txt
 .DS_Store
 android/app/build/
 android/.gradle/
+e2e/schermate/

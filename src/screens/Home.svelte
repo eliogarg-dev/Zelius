@@ -2,12 +2,14 @@
   import Icona from '../components/Icona.svelte';
 
   let {
+    eApp,
     onallenati,
     oncrea,
     onentra,
     onimpostazioni,
     stanzeDisponibili,
   }: {
+    eApp: boolean;
     onallenati: () => void;
     oncrea: () => void;
     onentra: () => void;
@@ -30,11 +32,16 @@
 <p class="sottotitolo muted">Il Paroliere da giocare insieme</p>
 
 <div class="azioni">
-  <button type="button" class="btn btn-primario" onclick={onallenati}>Allenati da solo</button>
-  <button type="button" class="btn grande" onclick={oncrea} disabled={!stanzeDisponibili}>Crea una stanza</button>
-  <button type="button" class="btn grande" onclick={onentra} disabled={!stanzeDisponibili}>Entra in una stanza</button>
-  {#if !stanzeDisponibili}
-    <p class="muted nota">Le stanze arrivano nella prossima versione.</p>
+  {#if eApp}
+    <button type="button" class="btn btn-primario" onclick={onallenati}>Allenati da solo</button>
+    <button type="button" class="btn grande" onclick={oncrea} disabled={!stanzeDisponibili}>Crea una stanza</button>
+    <button type="button" class="btn grande" onclick={onentra} disabled={!stanzeDisponibili}>Entra in una stanza</button>
+    {#if !stanzeDisponibili}
+      <p class="muted nota">Le stanze non sono ancora configurate.</p>
+    {/if}
+  {:else}
+    <button type="button" class="btn btn-primario" onclick={onentra} disabled={!stanzeDisponibili}>Entra in una stanza</button>
+    <p class="muted nota">Per allenarti da solo e creare stanze usa l'app Android.</p>
   {/if}
 </div>
 
