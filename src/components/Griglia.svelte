@@ -81,7 +81,7 @@
 >
   <div class="griglia" style:--lato={lato}>
     {#each griglia as simbolo, i (i)}
-      <div class="casella display" class:scelta={mostrato.includes(i)} bind:this={caselle[i]}>
+      <div class="casella display quadrata" class:scelta={mostrato.includes(i)} bind:this={caselle[i]}>
         {etichettaCasella(simbolo)}
       </div>
     {/each}
@@ -118,7 +118,6 @@
 
   .casella {
     margin: calc(var(--spazio) / 2);
-    aspect-ratio: 1;
     border-radius: 16px;
     background: var(--surf2);
     color: var(--text);

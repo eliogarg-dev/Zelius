@@ -26,7 +26,7 @@
 
 <div class="logo" aria-label="Zelius" role="img">
   {#each [...'ZELIUS'] as l, i (i)}
-    <span class="display" style:--i={i}>{l}</span>
+    <span class="display quadrata" style:--i={i}>{l}</span>
   {/each}
 </div>
 <p class="sottotitolo muted">Il Paroliere da giocare insieme</p>
@@ -63,7 +63,6 @@
   }
 
   .logo span {
-    aspect-ratio: 1;
     border-radius: 12px;
     background: var(--acc);
     color: var(--on-acc);

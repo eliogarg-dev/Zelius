@@ -181,6 +181,13 @@ dialog.conferma .btn-scelta {
   color: var(--on-acc);
 }
 
+/* Casella quadrata anche dove aspect-ratio non c'è (Chrome < 88, Safari < 15):
+   il padding in percentuale si calcola sulla larghezza. Serve un contenitore flex. */
+.quadrata::before {
+  content: '';
+  padding-top: 100%;
+}
+
 /* Scelta tra poche opzioni (griglia, durata, tema...) */
 .segmenti {
   display: grid;
