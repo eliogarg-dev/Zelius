@@ -20,8 +20,8 @@ Ultimo aggiornamento: 2026-10-23.
 - **Dizionario** (`public/dizionario.bin`, 236 KB): 380.641 parole da Morph-it!, senza nomi propri e senza forme verbali con pronomi attaccati, accenti tolti, più ZELIUS. Solo Morph-it per ora (Hunspell è GPL: rimandato).
 - **Logica di gioco** (`src/lib/game/`): alfabeto con Qu come simbolo unico (vale 2 lettere), DAWG, risolutore, punteggio (ZELIUS = 10 in totale), griglie con al massimo 3 (4x4) o 4 (5x5) lettere uguali e al massimo un Qu.
 - **Interfaccia** (`src/screens/`, `src/components/`): stile moderno dei mockup, tema automatico/chiaro/scuro, griglia da trascinare con traccia, tastiera alternativa, effetto ZELIUS.
-- **Stanze** (`src/lib/stanza/`): creazione con codice di 4 caratteri, QR code e link, richieste approva/rifiuta/blocca, impostazioni, mani a oltranza con pausa di 45 s, parole controllate con elenco cifrato, risultati con tab Classifica/Parole, presenza online, passaggio dell'host al primo giocatore con l'app quando l'host esce.
-- **Regole di sicurezza** (`database.rules.json`) con 19 test sull'emulatore.
+- **Stanze** (`src/lib/stanza/`): creazione con codice di 4 caratteri, QR code e link, richieste approva/rifiuta/blocca, impostazioni, mani a oltranza con pausa di 45 s, parole controllate con elenco cifrato, risultati con tab Classifica/Parole, presenza online, passaggio dell'host al primo giocatore con l'app quando l'host esce. L'host interrompe la mano tenendo premuta la X per 2 s (con conferma): contano le parole già trovate, tutti vedono "Interrotta da …" e il gioco resta fermo finché l'host (anche uno nuovo) non preme "Riparti".
+- **Regole di sicurezza** (`database.rules.json`) con 20 test sull'emulatore.
 - **App Android** (`android/`, `capacitor.config.json`, id `dev.eliogarg.zelius`): Capacitor 8, minSdk 26. Scanner QR in "Entra" (`@capacitor/barcode-scanner`, il codice si legge anche dal link), condivisione nativa (`@capacitor/share`: nella WebView `navigator.share` non c'è), tasto Indietro (dalla home chiude l'app, nella stanza non fa nulla, altrove torna alla home). Icona e splash generati da `assets/*.png` con `npx @capacitor/assets generate --android`.
 
 ## Firebase
@@ -64,7 +64,8 @@ Ultimo aggiornamento: 2026-10-23.
 | `cd android; .\gradlew assembleDebug` | Crea l'APK di prova in `android/app/build/outputs/apk/debug/` (con `JAVA_HOME` sul Java di Android Studio); in alternativa `npx cap open android` e si compila da Android Studio |
 | App sul telefono con gli emulatori | `npm run emulatori`; `adb reverse tcp:9000 tcp:9000` e `adb reverse tcp:9099 tcp:9099`; compilare con `VITE_HOST_EMULATORE=127.0.0.1 npx vite build --mode emulatore`, poi `npx cap sync android` e `assembleDebug`. Solo la build di debug permette l'http verso 127.0.0.1 (`android/app/src/debug/`). Nella prova del 23/10 era attivo anche `"allowMixedContent": true` in `android/app/src/main/assets/capacitor.config.json` (file generato, si azzera a ogni sync): non verificato se serve |
 | `npm test` | Test della logica (32) |
-| `npm run test:regole` | Test delle regole di sicurezza sull'emulatore (19) |
+| `npm run test:regole` | Test delle regole di sicurezza sull'emulatore (20) |
 | `npm run check` | Controllo dei tipi |
 | `node e2e/prova-allenamento.ts` | Prova completa dell'allenamento (con `npm run dev` su porta 5173) |
 | `node e2e/prova-stanza.ts` | Prova completa di una stanza con 4 giocatori e cambio di host (con emulatori e `npx vite --mode emulatore --port 5174`); dura circa 3 minuti |
+| `node e2e/prova-interruzione.ts` | Prova dell'interruzione di una mano e del gioco fermo dopo il cambio di host (stesse condizioni della prova della stanza); dura circa 30 secondi |

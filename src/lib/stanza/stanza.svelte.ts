@@ -39,6 +39,8 @@ export interface Meta {
   mano?: number;
   /** Avanzamento automatico fermato a fine mano perché qualcuno aspetta di entrare: riparte l'host. */
   pausa?: boolean;
+  /** Nome dell'host che ha interrotto la mano: contano le parole già trovate, e si riparte solo quando l'host la avvia. */
+  interrotta?: string;
 }
 
 export interface Impostazioni {
@@ -484,6 +486,7 @@ export class Stanza {
       'meta/mano': n,
       'meta/stato': 'gioco',
       'meta/pausa': null,
+      'meta/interrotta': null,
     });
   }
 
@@ -583,6 +586,17 @@ export class Stanza {
     } finally {
       this.lavorando = false;
     }
+  }
+
+  /** Interrompe per tutti la mano in corso: finisce subito (contano le parole già trovate) e il gioco resta fermo fino a "Prossima mano". */
+  async interrompi() {
+    const m = this.mano;
+    if (!m || !this.eHost) return;
+    await update(this.radice, {
+      [`mani/${m.n}/fine`]: oraServer(),
+      'meta/pausa': true,
+      'meta/interrotta': this.io?.nome ?? this.nome,
+    });
   }
 
   /** Chiude la stanza per tutti. */

@@ -2,6 +2,7 @@
   // Schermata di una mano in corso: tempo, griglia, parola in costruzione, parole trovate.
   // È la stessa per l'allenamento e per le stanze; cambia solo chi controlla le parole.
   import { onDestroy } from 'svelte';
+  import { conferma } from '../lib/conferma.ts';
   import { inParola, numeroLettere } from '../lib/game/alfabeto.ts';
   import { punti } from '../lib/game/punteggio.ts';
   import { MESSAGGI, type Esito, type Proposta } from '../lib/game/verifica.ts';
@@ -19,6 +20,7 @@
     verifica,
     onfine,
     onesci,
+    oninterrompi,
     inAttesa = 0,
   }: {
     griglia: number[];
@@ -31,6 +33,8 @@
     verifica: (p: Proposta) => Promise<Esito>;
     onfine: () => void;
     onesci?: () => void;
+    /** Solo per l'host: interrompe la mano per tutti, tenendo premuta la X per 2 secondi. */
+    oninterrompi?: () => void;
     /** Giocatori che aspettano di entrare (solo per l'host): entreranno a fine mano. */
     inAttesa?: number;
   } = $props();
@@ -44,7 +48,27 @@
       onfine();
     }
   }, 200);
-  onDestroy(() => clearInterval(timer));
+  onDestroy(() => {
+    clearInterval(timer);
+    clearTimeout(pressione);
+  });
+
+  let premuto = $state(false);
+  let pressione: ReturnType<typeof setTimeout> | undefined;
+  function tieni() {
+    premuto = true;
+    pressione = setTimeout(() => {
+      lascia();
+      void interrompi();
+    }, 2000);
+  }
+  function lascia() {
+    premuto = false;
+    clearTimeout(pressione);
+  }
+  async function interrompi() {
+    if (await conferma('Interrompere la mano per tutti? Contano le parole già trovate.', 'Interrompi')) oninterrompi?.();
+  }
 
   const restanti = $derived(Math.max(0, Math.ceil((fineAlle - adesso) / 1000)));
   const tempo = $derived(`${Math.floor(restanti / 60)}:${String(restanti % 60).padStart(2, '0')}`);
@@ -89,6 +113,23 @@
   <div class="testa">
     {#if onesci}
       <button type="button" class="btn-icona" aria-label="Esci" onclick={onesci}><Icona nome="chiudi" /></button>
+    {/if}
+    {#if oninterrompi}
+      <!-- Da tastiera (click senza puntatore) chiede subito conferma. -->
+      <button
+        type="button"
+        class="btn-icona tieni"
+        class:premuto
+        aria-label="Interrompi la mano (tieni premuto)"
+        onpointerdown={tieni}
+        onpointerup={lascia}
+        onpointerleave={lascia}
+        onpointercancel={lascia}
+        oncontextmenu={(e) => e.preventDefault()}
+        onclick={(e) => e.detail === 0 && interrompi()}
+      >
+        <Icona nome="chiudi" />
+      </button>
     {/if}
     <div class="pillola">{intestazione}</div>
     <div class="punteggio"><strong class="display">{totale}</strong> punti</div>
@@ -167,6 +208,19 @@
     margin-left: auto;
     font-size: 15px;
     color: var(--muted);
+  }
+
+  /* Si riempie di rosso nei 2 secondi in cui va tenuta premuta. */
+  .tieni {
+    touch-action: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .tieni.premuto {
+    background: var(--danger);
+    color: var(--bg);
+    transition: background 2s linear, color 2s linear;
   }
 
   .campanella {

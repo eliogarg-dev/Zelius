@@ -19,6 +19,7 @@
           "stato": { ".validate": "newData.val() === 'attesa' || newData.val() === 'gioco'" },
           "mano": { ".validate": "newData.isNumber() && newData.val() >= 1" },
           "pausa": { ".validate": "newData.isBoolean()" },
+          "interrotta": { ".validate": "newData.isString() && newData.val().length <= 24" },
           "$altro": { ".validate": false }
         },
 

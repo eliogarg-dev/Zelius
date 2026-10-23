@@ -25,8 +25,9 @@
   let avviando = $state(false);
   // Avanzamento automatico fermato per chi aspetta di entrare: l'host trova subito le richieste aperte.
   const inPausa = $derived(stanza.meta?.pausa === true);
+  const interrotta = $derived(stanza.meta?.interrotta);
   $effect(() => {
-    if (stanza.eHost && inPausa) pannello = 'richieste';
+    if (stanza.eHost && inPausa && !interrotta) pannello = 'richieste';
   });
 
   async function condividi() {
@@ -179,6 +180,7 @@
       verifica={(p) => stanza.proponi(p)}
       onfine={() => {}}
       inAttesa={stanza.eHost ? numeroRichieste : 0}
+      oninterrompi={stanza.eHost ? () => stanza.interrompi().catch(() => mostra('Non riesco a interrompere. Riprova.')) : undefined}
     />
   {/key}
 {:else if stanza.fase === 'spettatore'}
@@ -194,11 +196,15 @@
   </div>
 {:else}
   {@render testata(
-    stanza.fase === 'finita' ? 'Partita finita' : `Fine mano ${stanza.risultati?.n ?? ''}`,
+    stanza.fase === 'finita' ? 'Partita finita' : interrotta && stanza.fase === 'risultati' ? 'Partita interrotta' : `Fine mano ${stanza.risultati?.n ?? ''}`,
     stanza.fase === 'conto'
       ? `Prossima mano tra ${orologio(alInizio)}`
       : stanza.fase === 'finita'
         ? 'Nessuno con l\'app può preparare altre griglie'
+        : interrotta
+          ? stanza.eHost
+            ? `Interrotta da ${interrotta}: riparti quando volete`
+            : `Interrotta da ${interrotta}: aspetta che ${nomeHost} riparta`
         : stanza.impostazioni.automatico && !inPausa
           ? 'Prossima mano in preparazione…'
           : stanza.eHost && inPausa
@@ -219,7 +225,7 @@
       disabled={avviando || !stanza.risultati?.dati}
       onclick={() => avvia(() => stanza.prossimaMano())}
     >
-      {avviando ? 'Preparo la griglia…' : 'Prossima mano'}
+      {avviando ? 'Preparo la griglia…' : interrotta ? 'Riparti' : 'Prossima mano'}
     </button>
   {/if}
 {/if}

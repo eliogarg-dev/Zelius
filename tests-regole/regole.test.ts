@@ -77,6 +77,8 @@ describe('creazione della stanza', () => {
     await assertFails(db('bob').ref(`${S}/impostazioni/lato`).set(5));
     await assertSucceeds(db('host').ref(`${S}/meta/pausa`).set(true));
     await assertFails(db('host').ref(`${S}/meta/pausa`).set('sì'));
+    await assertSucceeds(db('host').ref(`${S}/meta/interrotta`).set('Host'));
+    await assertFails(db('host').ref(`${S}/meta/interrotta`).set(true));
     await assertFails(db('bob').ref(`${S}/meta/pausa`).set(false));
   });
 });
@@ -168,6 +170,13 @@ describe('durante la mano', () => {
     await assertSucceeds(db('host').ref(`${S}/risultati/1`).set(risultati));
     await assertFails(db('host').ref(`${S}/risultati/1`).set(risultati));
     await assertFails(db('bob').ref(`${S}/mani/2`).set({ griglia: 'a', inizio: 1, fine: 2, sale: 1, impronte: '', minLettere: 4 }));
+  });
+
+  it('solo l\'host interrompe la mano in corso', async () => {
+    await preparaStanza({ inizio: Date.now() - 10_000, fine: Date.now() + 110_000 });
+    const interruzione = { 'mani/1/fine': Date.now(), 'meta/pausa': true, 'meta/interrotta': 'Host' };
+    await assertFails(db('bob').ref(S).update(interruzione));
+    await assertSucceeds(db('host').ref(S).update(interruzione));
   });
 });
 
