@@ -69,6 +69,8 @@ describe('creazione della stanza', () => {
     await preparaStanza();
     await assertSucceeds(db('host').ref(`${S}/impostazioni`).set({ lato: 5, durata: 180, minLettere: 5 }));
     await assertFails(db('host').ref(`${S}/impostazioni`).set({ lato: 6, durata: 180, minLettere: 5 }));
+    await assertSucceeds(db('host').ref(`${S}/impostazioni/automatico`).set(true));
+    await assertFails(db('host').ref(`${S}/impostazioni/automatico`).set('sì'));
     await assertFails(db('bob').ref(`${S}/impostazioni/lato`).set(5));
   });
 });

@@ -135,6 +135,8 @@ await giulia.context().close();
 log('Giulia è uscita');
 await luca.getByRole('button', { name: 'Chiudi la stanza per tutti' }).waitFor({ timeout: 30000 });
 log('Luca è il nuovo host: ok');
+// L'avanzamento automatico è spento: la mano 2 la avvia Luca.
+await luca.getByRole('button', { name: 'Prossima mano' }).click();
 for (const p of [marco, luca]) await p.locator('.cornice.attiva').waitFor({ timeout: 70000 });
 log('Mano 2 iniziata');
 const sol2 = await soluzioniDi(luca);

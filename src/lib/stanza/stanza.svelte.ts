@@ -43,6 +43,8 @@ export interface Impostazioni {
   lato: Lato;
   durata: 60 | 120 | 180;
   minLettere: 4 | 5 | 6;
+  /** Se falso, la mano successiva parte solo quando l'host la avvia. */
+  automatico: boolean;
 }
 
 export interface Giocatore {
@@ -92,7 +94,7 @@ export const PAUSA_MS = 45_000;
 /** Tolleranza per le parole inviate negli ultimi istanti (deve stare sotto i 3 s delle regole). */
 const TOLLERANZA_MS = 2500;
 
-export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = { lato: 4, durata: 120, minLettere: 4 };
+export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = { lato: 4, durata: 120, minLettere: 4, automatico: false };
 
 export class Stanza {
   readonly codice: string;
@@ -369,8 +371,8 @@ export class Stanza {
       void this.chiudiMano(m);
     }
 
-    // Nuovo host subentrato quando i risultati erano già scritti ma la mano successiva no.
-    if (this.eHost && this.meta.stato === 'gioco' && m && this.meta.mano === m.n && manoFinita && !this.lavorando && this.risultati?.n === m.n && this.risultati.dati) {
+    // Nuovo host subentrato (o avanzamento automatico appena attivato) quando i risultati erano già scritti ma la mano successiva no.
+    if (this.impostazioni.automatico && this.eHost && this.meta.stato === 'gioco' && m && this.meta.mano === m.n && manoFinita && !this.lavorando && this.risultati?.n === m.n && this.risultati.dati) {
       this.lavorando = true;
       this.preparaMano(m.n + 1, Math.max(m.fine + PAUSA_MS, oraServer() + 10_000))
         .catch((e) => console.error('Errore nel preparare la mano', e))
@@ -430,7 +432,7 @@ export class Stanza {
     }
   }
 
-  /** Solo host: calcola i risultati della mano finita e prepara la successiva. */
+  /** Solo host: calcola i risultati della mano finita e, se l'avanzamento è automatico, prepara la successiva. */
   private async chiudiMano(m: ManoCorrente) {
     this.lavorando = true;
     try {
@@ -446,7 +448,7 @@ export class Stanza {
       const r = calcolaRisultati(parole.val() ?? {}, new Set(soluzioni), precedenti?.val() ?? {}, partecipanti);
       await set(this.figlio(`risultati/${m.n}`), r).catch(() => {});
       this.soluzioniPreparate.delete(m.n);
-      await this.preparaMano(m.n + 1, Math.max(m.fine + PAUSA_MS, oraServer() + 10_000));
+      if (this.impostazioni.automatico) await this.preparaMano(m.n + 1, Math.max(m.fine + PAUSA_MS, oraServer() + 10_000));
     } catch (e) {
       console.error('Errore nel chiudere la mano', e);
     } finally {
@@ -557,6 +559,18 @@ export class Stanza {
     this.lavorando = true;
     try {
       await this.preparaMano(1, oraServer() + 4000);
+    } finally {
+      this.lavorando = false;
+    }
+  }
+
+  /** Avvia a mano la mano successiva, una volta pronti i risultati di quella finita. */
+  async prossimaMano() {
+    const m = this.mano;
+    if (!m || this.lavorando || this.meta?.mano !== m.n || this.risultati?.n !== m.n || !this.risultati.dati) return;
+    this.lavorando = true;
+    try {
+      await this.preparaMano(m.n + 1, oraServer() + 4000);
     } finally {
       this.lavorando = false;
     }

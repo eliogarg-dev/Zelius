@@ -43,10 +43,10 @@
     setTimeout(() => (avviso = ''), 2000);
   }
 
-  async function inizia() {
+  async function avvia(azione: () => Promise<void>) {
     avviando = true;
     try {
-      await stanza.iniziaPartita();
+      await azione();
     } catch (e) {
       console.error(e);
       mostra('Non riesco a iniziare. Riprova.');
@@ -158,7 +158,7 @@
   <div class="sezione"><GiocatoriStanza {stanza} /></div>
 
   {#if stanza.eHost}
-    <button type="button" class="btn btn-primario in-fondo" disabled={avviando} onclick={inizia}>
+    <button type="button" class="btn btn-primario in-fondo" disabled={avviando} onclick={() => avvia(() => stanza.iniziaPartita())}>
       {avviando ? 'Preparo la griglia…' : 'Inizia la partita'}
     </button>
   {/if}
@@ -193,12 +193,26 @@
       ? `Prossima mano tra ${orologio(alInizio)}`
       : stanza.fase === 'finita'
         ? 'Nessuno con l\'app può preparare altre griglie'
-        : 'Prossima mano in preparazione…',
+        : stanza.impostazioni.automatico
+          ? 'Prossima mano in preparazione…'
+          : stanza.eHost
+            ? 'Avvia la prossima mano quando volete'
+            : `Aspetta che ${nomeHost} avvii la prossima mano`,
     true,
   )}
   {@render strumentiHost()}
   {#if stanza.risultati}
     <div class="sezione"><RisultatiMano {stanza} risultati={stanza.risultati} /></div>
+  {/if}
+  {#if stanza.eHost && stanza.fase === 'risultati' && !stanza.impostazioni.automatico}
+    <button
+      type="button"
+      class="btn btn-primario in-fondo"
+      disabled={avviando || !stanza.risultati?.dati}
+      onclick={() => avvia(() => stanza.prossimaMano())}
+    >
+      {avviando ? 'Preparo la griglia…' : 'Prossima mano'}
+    </button>
   {/if}
 {/if}
 

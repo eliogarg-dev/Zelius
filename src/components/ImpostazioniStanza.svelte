@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Griglia, durata e lunghezza minima: un tocco passa al valore successivo.
+  // Griglia, durata, lunghezza minima e avanzamento: un tocco passa al valore successivo.
   import type { Impostazioni } from '../lib/stanza/stanza.svelte.ts';
 
   let {
@@ -38,6 +38,15 @@
   >
     <span class="nome">Minimo</span><span class="valore display">{impostazioni.minLettere} lettere</span>
   </button>
+  <button
+    type="button"
+    class="intera"
+    disabled={!modificabili}
+    aria-label={`Prossima mano ${impostazioni.automatico ? 'automatica' : "avviata dall'host"}${modificabili ? ', tocca per cambiare' : ''}`}
+    onclick={() => oncambia({ ...impostazioni, automatico: !impostazioni.automatico })}
+  >
+    <span class="nome">Prossima mano</span><span class="valore display">{impostazioni.automatico ? 'Automatica' : "La avvia l'host"}</span>
+  </button>
 </div>
 
 <style>
@@ -57,6 +66,10 @@
     align-items: center;
     justify-content: center;
     gap: 2px;
+  }
+
+  .intera {
+    grid-column: 1 / -1;
   }
 
   button:disabled {

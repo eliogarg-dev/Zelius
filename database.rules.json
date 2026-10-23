@@ -28,6 +28,7 @@
           "lato": { ".validate": "newData.val() === 4 || newData.val() === 5" },
           "durata": { ".validate": "newData.val() === 60 || newData.val() === 120 || newData.val() === 180" },
           "minLettere": { ".validate": "newData.val() === 4 || newData.val() === 5 || newData.val() === 6" },
+          "automatico": { ".validate": "newData.isBoolean()" },
           "$altro": { ".validate": false }
         },
 
