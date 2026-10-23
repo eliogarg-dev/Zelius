@@ -23,6 +23,9 @@
   let avviso = $state('');
   let pannello: 'richieste' | 'impostazioni' | null = $state(null);
   let avviando = $state(false);
+  let qrGrande = $state(false);
+  let larghezza = $state(0);
+  let altezza = $state(0);
   // Avanzamento automatico fermato per chi aspetta di entrare: l'host trova subito le richieste aperte.
   const inPausa = $derived(stanza.meta?.pausa === true);
   const interrotta = $derived(stanza.meta?.interrotta);
@@ -144,7 +147,9 @@
   {@render testata(stanza.codice, stanza.eHost ? 'La tua stanza' : `Stanza di ${nomeHost}`)}
 
   <div class="scheda qr-scheda">
-    <QrCode testo={link} dimensione={88} />
+    <button type="button" class="qr-tocco" aria-label="Ingrandisci il QR code" onclick={() => (qrGrande = true)}>
+      <QrCode testo={link} dimensione={88} />
+    </button>
     <div class="qr-testo">
       <div class="muted piccolo">Inquadra per entrare, anche senza app</div>
       <div class="link">{link.replace(/^https?:\/\//, '')}</div>
@@ -230,9 +235,17 @@
   {/if}
 {/if}
 
+{#if qrGrande && stanza.fase === 'attesa'}
+  <button type="button" class="qr-pieno" aria-label="Chiudi il QR code" onclick={() => (qrGrande = false)}>
+    <QrCode testo={link} dimensione={Math.min(larghezza, altezza) - 64} />
+  </button>
+{/if}
+
 {#if avviso}
   <div class="avviso" role="status">{avviso}</div>
 {/if}
+
+<svelte:window bind:innerWidth={larghezza} bind:innerHeight={altezza} />
 
 <style>
   .testa {
@@ -273,6 +286,26 @@
     display: flex;
     gap: 14px;
     align-items: center;
+  }
+
+  .qr-tocco {
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+
+  .qr-pieno {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: #ffffff;
+    cursor: zoom-out;
   }
 
   .qr-testo {
