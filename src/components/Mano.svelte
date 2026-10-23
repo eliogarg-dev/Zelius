@@ -5,7 +5,7 @@
   import { inParola, numeroLettere } from '../lib/game/alfabeto.ts';
   import { punti } from '../lib/game/punteggio.ts';
   import { MESSAGGI, type Esito, type Proposta } from '../lib/game/verifica.ts';
-  import { PAROLA_SPECIALE } from '../lib/game/punteggio.ts';
+  import { PAROLA_SPECIALE, PUNTI_PAROLA_SPECIALE } from '../lib/game/punteggio.ts';
   import Griglia from './Griglia.svelte';
   import Icona from './Icona.svelte';
 
@@ -58,7 +58,7 @@
   });
 
   let messaggio: { testo: string; ok: boolean } | null = $state(null);
-  let zapp = $state(false);
+  let speciale = $state(false);
   let tastiera = $state(false);
   let testo = $state('');
 
@@ -67,8 +67,8 @@
     if (esito.ok) {
       messaggio = { testo: `${esito.parola} +${esito.punti}`, ok: true };
       if (esito.parola === PAROLA_SPECIALE) {
-        zapp = true;
-        setTimeout(() => (zapp = false), 1600);
+        speciale = true;
+        setTimeout(() => (speciale = false), 1600);
       }
     } else if (esito.parola.length > 0) {
       messaggio = { testo: `${esito.parola} ${MESSAGGI[esito.motivo]}`, ok: false };
@@ -128,8 +128,8 @@
     {tastiera ? 'Nascondi la tastiera' : 'Usa la tastiera'}
   </button>
 
-  {#if zapp}
-    <div class="zapp display" aria-live="assertive">ZAPP! <span>+10</span></div>
+  {#if speciale}
+    <div class="speciale display" aria-live="assertive">{PAROLA_SPECIALE}! <span>+{PUNTI_PAROLA_SPECIALE}</span></div>
   {/if}
 </div>
 
@@ -276,25 +276,26 @@
     margin-top: 20px;
   }
 
-  .zapp {
+  .speciale {
     position: fixed;
     inset: 0;
     display: flex;
     align-items: center;
+    flex-direction: column;
     justify-content: center;
-    gap: 16px;
-    font-size: 72px;
+    gap: 4px;
+    font-size: 64px;
     color: var(--warm-bg);
     pointer-events: none;
-    animation: zapp 1.6s ease-out forwards;
+    animation: speciale 1.6s ease-out forwards;
     text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
   }
 
-  .zapp span {
+  .speciale span {
     font-size: 40px;
   }
 
-  @keyframes zapp {
+  @keyframes speciale {
     0% {
       transform: scale(0.4) rotate(-8deg);
       opacity: 0;

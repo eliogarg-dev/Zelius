@@ -1,6 +1,6 @@
-// Punteggio come su ilgiocodelparoliere.it, più la parola speciale ZAPP.
+// Punteggio come su ilgiocodelparoliere.it, più la parola speciale ZELIUS.
 
-export const PAROLA_SPECIALE = 'ZAPP';
+export const PAROLA_SPECIALE = 'ZELIUS';
 export const PUNTI_PAROLA_SPECIALE = 10;
 
 const TABELLA: Record<number, number> = { 4: 1, 5: 2, 6: 3, 7: 5, 8: 8 };

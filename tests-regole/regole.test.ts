@@ -12,7 +12,7 @@ const S = 'stanze/K74Q';
 
 beforeAll(async () => {
   env = await initializeTestEnvironment({
-    projectId: 'demo-zapp',
+    projectId: 'demo-zelius',
     database: {
       rules: readFileSync(new URL('../database.rules.json', import.meta.url), 'utf8'),
       host: '127.0.0.1',

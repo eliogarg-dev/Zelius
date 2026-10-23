@@ -1,4 +1,4 @@
-package dev.eliogarg.zapp;
+package dev.eliogarg.zelius;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -53,7 +53,7 @@ Una versione del Paroliere (Boggle italiano) con le stesse regole di gioco di ht
 | 9 o più | 2 punti in più per ogni lettera (9→10, 10→12, 11→14 …) |
 | 16 o più | 24 (massimo) |
 
-**Parola speciale ZAPP:** vale **10 punti in totale** e mostra un effetto grafico a chi la trova. Il bonus va a tutti quelli che la trovano. La griglia resta casuale: ZAPP non viene mai inserita apposta.
+**Parola speciale ZELIUS:** vale **10 punti in totale** e mostra un effetto grafico a chi la trova. Il bonus va a tutti quelli che la trovano. La griglia resta casuale: ZELIUS non viene mai inserita apposta.
 
 ### Tempi
 - Durata della mano scelta dall'host: **1, 2 o 3 minuti** (predefinita 2).
@@ -214,7 +214,7 @@ Uno script, lanciato una volta durante lo sviluppo e non nell'app, prepara il di
 3. toglie le forme verbali con pronomi attaccati, usando le etichette di Morph-it. Va verificato quanto bene riesce a farlo;
 4. toglie gli accenti, le parole con J, K, X, Y, W e quelle con una Q non seguita da U;
 5. tiene solo le parole da 4 a 25 lettere, contando QU come 2;
-6. aggiunge **ZAPP**;
+6. aggiunge **ZELIUS**;
 7. salva il risultato in un formato compatto (un albero di lettere compresso) da mettere dentro l'app.
 
 **Da verificare durante lo sviluppo:** la dimensione finale, che si stima in qualche MB, e la **compatibilità delle licenze**. La GPL di Hunspell potrebbe imporre condizioni all'app. Se crea problemi, si usa solo Morph-it.
@@ -242,7 +242,7 @@ L'app esplora tutti i percorsi della griglia seguendo l'albero del dizionario, e
 
 - **Test automatici** su:
   - ricerca delle parole (griglie note con le loro soluzioni);
-  - punteggio (tabella, Qu = 2, ZAPP = 10);
+  - punteggio (tabella, Qu = 2, ZELIUS = 10);
   - controllo dei percorsi sulla griglia;
   - generazione della griglia.
 - **Test delle regole di sicurezza** con l'emulatore di Firebase: parole fuori tempo, giocatori non approvati o bloccati, chi non è host che prova a scrivere i risultati.

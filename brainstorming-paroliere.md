@@ -2,7 +2,7 @@
 
 Ultimo aggiornamento: 2026-10-22. Nessun codice scritto: siamo ancora nella fase di definizione.
 
-**Per riprendere con Claude:** apri la cartella `Zapp` in Claude Code e scrivi:
+**Per riprendere con Claude:** apri la cartella `Zelius` in Claude Code e scrivi:
 "Leggi STATO-LAVORI.md, paroliere-design.md e brainstorming-paroliere.md e continuiamo l'implementazione."
 
 ---
@@ -53,12 +53,12 @@ Si crea una stanza privata, si condivide link o QR code, gli altri entrano. Chi 
 
 Brainstorming chiuso. Documento di design: `paroliere-design.md`.
 
-## Parola speciale ZAPP (deciso)
+## Parola speciale ZELIUS (deciso)
 
-- ZAPP è aggiunta al dizionario come parola speciale (non è una parola italiana).
+- ZELIUS è aggiunta al dizionario come parola speciale (non è una parola italiana).
 - Chi la trova riceve **10 punti in totale** (al posto dell'1 punto normale di una parola di 4 lettere), con un effetto grafico.
 - Il bonus va a **tutti quelli che la trovano**, come per le altre parole.
-- La griglia resta casuale: ZAPP **non** viene inserita apposta.
+- La griglia resta casuale: ZELIUS **non** viene inserita apposta.
 
 ## Aspetto delle schermate (deciso)
 

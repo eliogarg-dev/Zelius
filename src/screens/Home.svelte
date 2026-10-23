@@ -24,8 +24,8 @@
   </button>
 </div>
 
-<div class="logo" aria-label="Zapp" role="img">
-  {#each ['Z', 'A', 'P', 'P'] as l, i (i)}
+<div class="logo" aria-label="Zelius" role="img">
+  {#each [...'ZELIUS'] as l, i (i)}
     <span class="display" style:--i={i}>{l}</span>
   {/each}
 </div>
@@ -54,9 +54,9 @@
   .logo {
     margin-top: 48px;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
-    padding: 10px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px;
     background: var(--surf);
     border: 1px solid var(--line);
     border-radius: 22px;
@@ -64,13 +64,13 @@
 
   .logo span {
     aspect-ratio: 1;
-    border-radius: 16px;
+    border-radius: 12px;
     background: var(--acc);
     color: var(--on-acc);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 40px;
+    font-size: 30px;
     animation: entra 500ms calc(var(--i) * 90ms) both ease-out;
   }
 

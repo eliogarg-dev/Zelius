@@ -17,12 +17,12 @@ Ultimo aggiornamento: 2026-10-23.
 
 ## Cosa c'è
 
-- **Dizionario** (`public/dizionario.bin`, 236 KB): 380.641 parole da Morph-it!, senza nomi propri e senza forme verbali con pronomi attaccati, accenti tolti, più ZAPP. Solo Morph-it per ora (Hunspell è GPL: rimandato).
-- **Logica di gioco** (`src/lib/game/`): alfabeto con Qu come simbolo unico (vale 2 lettere), DAWG, risolutore, punteggio (ZAPP = 10 in totale), griglie con al massimo 3 (4x4) o 4 (5x5) lettere uguali e al massimo un Qu.
-- **Interfaccia** (`src/screens/`, `src/components/`): stile moderno dei mockup, tema automatico/chiaro/scuro, griglia da trascinare con traccia, tastiera alternativa, effetto ZAPP.
+- **Dizionario** (`public/dizionario.bin`, 236 KB): 380.641 parole da Morph-it!, senza nomi propri e senza forme verbali con pronomi attaccati, accenti tolti, più ZELIUS. Solo Morph-it per ora (Hunspell è GPL: rimandato).
+- **Logica di gioco** (`src/lib/game/`): alfabeto con Qu come simbolo unico (vale 2 lettere), DAWG, risolutore, punteggio (ZELIUS = 10 in totale), griglie con al massimo 3 (4x4) o 4 (5x5) lettere uguali e al massimo un Qu.
+- **Interfaccia** (`src/screens/`, `src/components/`): stile moderno dei mockup, tema automatico/chiaro/scuro, griglia da trascinare con traccia, tastiera alternativa, effetto ZELIUS.
 - **Stanze** (`src/lib/stanza/`): creazione con codice di 4 caratteri, QR code e link, richieste approva/rifiuta/blocca, impostazioni, mani a oltranza con pausa di 45 s, parole controllate con elenco cifrato, risultati con tab Classifica/Parole, presenza online, passaggio dell'host al primo giocatore con l'app quando l'host esce.
 - **Regole di sicurezza** (`database.rules.json`) con 19 test sull'emulatore.
-- **App Android** (`android/`, `capacitor.config.json`, id `dev.eliogarg.zapp`): Capacitor 8, minSdk 26. Scanner QR in "Entra" (`@capacitor/barcode-scanner`, il codice si legge anche dal link), condivisione nativa (`@capacitor/share`: nella WebView `navigator.share` non c'è), tasto Indietro (dalla home chiude l'app, nella stanza non fa nulla, altrove torna alla home). Icona e splash generati da `assets/*.png` con `npx @capacitor/assets generate --android`.
+- **App Android** (`android/`, `capacitor.config.json`, id `dev.eliogarg.zelius`): Capacitor 8, minSdk 26. Scanner QR in "Entra" (`@capacitor/barcode-scanner`, il codice si legge anche dal link), condivisione nativa (`@capacitor/share`: nella WebView `navigator.share` non c'è), tasto Indietro (dalla home chiude l'app, nella stanza non fa nulla, altrove torna alla home). Icona e splash generati da `assets/*.png` con `npx @capacitor/assets generate --android`.
 
 ## Scelte prese durante l'implementazione (non nel design)
 
@@ -42,7 +42,7 @@ Ultimo aggiornamento: 2026-10-23.
 ## Preparare un altro PC
 
 1. Installare **Node.js 24 LTS** e **git**.
-2. Per emulatori Firebase e Android serve **Java 21**: sul primo PC è un JDK portatile in `%LOCALAPPDATA%\Programs\jdk-21…` (scaricato da adoptium.net). `scripts/firebase.mjs` lo trova da solo, oppure si imposta `ZAPP_JAVA_HOME`.
+2. Per emulatori Firebase e Android serve **Java 21**: sul primo PC è un JDK portatile in `%LOCALAPPDATA%\Programs\jdk-21…` (scaricato da adoptium.net). `scripts/firebase.mjs` lo trova da solo, oppure si imposta `ZELIUS_JAVA_HOME`.
 3. `npm install`, poi `npx playwright install chromium` per le prove automatiche.
 4. Il dizionario è già nel repository: non serve rigenerarlo.
 5. Per l'app Android: Android Studio (contiene già un Java 21 in `C:\Program Files\Android\Android Studio\jbr`) con l'SDK in `%LOCALAPPDATA%\Android\Sdk`.

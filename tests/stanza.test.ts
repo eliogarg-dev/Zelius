@@ -24,7 +24,7 @@ describe('codice della stanza', () => {
     expect(leggiCodice(' k74q ')).toBe('K74Q');
     expect(leggiCodice('K7')).toBeNull();
     expect(leggiCodice('K7-Q')).toBeNull();
-    expect(leggiCodice('https://zapp.web.app/s/k74q/')).toBe('K74Q');
+    expect(leggiCodice('https://zelius.web.app/s/k74q/')).toBe('K74Q');
   });
 });
 
@@ -53,14 +53,14 @@ describe('elenco cifrato', () => {
 });
 
 describe('risultati della mano', () => {
-  const soluzioni = new Set(['CASA', 'QUADRO', 'SQUADRONE', 'ZAPP']);
+  const soluzioni = new Set(['CASA', 'QUADRO', 'SQUADRONE', 'ZELIUS']);
 
   it('dà i punti pieni a tutti quelli che trovano la stessa parola', () => {
     const r = calcolaRisultati(
       {
         giulia: { SQUADRONE: true, CASA: true },
         marco: { CASA: true, QUADRO: true, INVENTATA: true },
-        sara: { ZAPP: true },
+        sara: { ZELIUS: true },
       },
       soluzioni,
       { giulia: 5, marco: 1 },
@@ -68,7 +68,7 @@ describe('risultati della mano', () => {
     );
     expect(r.punti).toEqual({ giulia: 11, marco: 4, sara: 10, luca: 0 });
     expect(r.totali).toEqual({ giulia: 16, marco: 5, sara: 10, luca: 0 });
-    expect(r.trovate).toEqual({ SQUADRONE: 'giulia', CASA: 'giulia marco', QUADRO: 'marco', ZAPP: 'sara' });
+    expect(r.trovate).toEqual({ SQUADRONE: 'giulia', CASA: 'giulia marco', QUADRO: 'marco', ZELIUS: 'sara' });
   });
 
   it('mantiene i totali di chi non ha giocato questa mano', () => {

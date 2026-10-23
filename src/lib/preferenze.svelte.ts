@@ -2,7 +2,7 @@
 
 export type Tema = 'auto' | 'chiaro' | 'scuro';
 
-const CHIAVE = 'zapp.preferenze';
+const CHIAVE = 'zelius.preferenze';
 
 function leggi(): { nickname: string; tema: Tema } {
   try {

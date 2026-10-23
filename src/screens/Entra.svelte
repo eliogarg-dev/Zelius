@@ -54,7 +54,7 @@
       });
       const c = leggiCodice(ScanResult);
       if (c) codice = c;
-      else erroreLocale = 'Questo QR code non è di una stanza di Zapp.';
+      else erroreLocale = 'Questo QR code non è di una stanza di Zelius.';
     } catch {
       // Scansione annullata o fotocamera negata.
     }

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Zapp</string>
-    <string name="title_activity_main">Zapp</string>
-    <string name="package_name">dev.eliogarg.zapp</string>
-    <string name="custom_url_scheme">dev.eliogarg.zapp</string>
+    <string name="app_name">Zelius</string>
+    <string name="title_activity_main">Zelius</string>
+    <string name="package_name">dev.eliogarg.zelius</string>
+    <string name="custom_url_scheme">dev.eliogarg.zelius</string>
 </resources>

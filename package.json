@@ -1,5 +1,5 @@
 {
-  "name": "zapp",
+  "name": "zelius",
   "version": "0.1.0",
   "description": "Paroliere tra amici: app Android e versione browser",
   "private": true,
@@ -11,14 +11,14 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
     "dizionario": "node --max-old-space-size=6000 scripts/prepara-dizionario.ts",
-    "emulatori": "node scripts/firebase.mjs emulators:start --project demo-zapp",
-    "test:regole": "node scripts/firebase.mjs emulators:exec --only database --project demo-zapp \"vitest run --config vitest.regole.config.ts\"",
+    "emulatori": "node scripts/firebase.mjs emulators:start --project demo-zelius",
+    "test:regole": "node scripts/firebase.mjs emulators:exec --only database --project demo-zelius \"vitest run --config vitest.regole.config.ts\"",
     "dev:emulatore": "vite --mode emulatore --host",
     "android": "vite build && cap sync android"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eliogarg-dev/Zapp.git"
+    "url": "git+https://github.com/eliogarg-dev/Zelius.git"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.3",

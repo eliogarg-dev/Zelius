@@ -25,7 +25,7 @@
   let avviando = $state(false);
 
   async function condividi() {
-    const dati = { title: 'Zapp · Paroliere', text: `Gioca con me a Zapp! Stanza ${stanza.codice}`, url: link };
+    const dati = { title: 'Zelius · Paroliere', text: `Gioca con me a Zelius! Stanza ${stanza.codice}`, url: link };
     try {
       // Nell'app la WebView non ha navigator.share: il plugin usa la condivisione di Android.
       if ((await Share.canShare()).value) await Share.share(dati);

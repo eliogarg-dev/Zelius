@@ -1,4 +1,4 @@
-# Zapp — Paroliere tra amici
+# Zelius — Paroliere tra amici
 
 Il Paroliere (Boggle italiano) da giocare insieme: ognuno dal proprio telefono, con l'app Android o dal browser.
 Design: [paroliere-design.md](paroliere-design.md) · Note di brainstorming: [brainstorming-paroliere.md](brainstorming-paroliere.md)
@@ -23,7 +23,7 @@ Il gioco usa `public/dizionario.bin`, già pronto nel repository. Per rigenerarl
 3. esegui `npm run dizionario`
 
 Lo script toglie nomi propri, abbreviazioni, forme verbali con pronomi attaccati, accenti e parole con J, K, X, Y, W,
-poi aggiunge la parola speciale ZAPP.
+poi aggiunge la parola speciale ZELIUS.
 
 ## Crediti
 

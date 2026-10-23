@@ -10,7 +10,7 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_DATABASE_URL?: string;
   readonly VITE_FIREBASE_PROJECT_ID?: string;
   readonly VITE_FIREBASE_APP_ID?: string;
-  /** Es. https://zapp-paroliere.web.app — usato nei link delle stanze. */
+  /** Es. https://zelius.web.app — usato nei link delle stanze. */
   readonly VITE_URL_PUBBLICO?: string;
 }
 

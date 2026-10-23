@@ -6,7 +6,7 @@ import { connectAuthEmulator, getAuth, onAuthStateChanged, signInAnonymously, ty
 import { connectDatabaseEmulator, getDatabase, onValue, ref, type Database } from 'firebase/database';
 
 const emulatore = import.meta.env.VITE_FIREBASE_EMULATORE === '1';
-const progetto = import.meta.env.VITE_FIREBASE_PROJECT_ID ?? 'demo-zapp';
+const progetto = import.meta.env.VITE_FIREBASE_PROJECT_ID ?? 'demo-zelius';
 // Nell'app Capacitor intercetta tutto ciò che va a "localhost": col telefono via USB (adb reverse) si usa 127.0.0.1.
 const hostEmulatore = import.meta.env.VITE_HOST_EMULATORE || location.hostname;
 

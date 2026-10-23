@@ -1,6 +1,6 @@
 {
-  "appId": "dev.eliogarg.zapp",
-  "appName": "Zapp",
+  "appId": "dev.eliogarg.zelius",
+  "appName": "Zelius",
   "webDir": "dist",
   "android": {
     "backgroundColor": "#111318"

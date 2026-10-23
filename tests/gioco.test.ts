@@ -63,8 +63,8 @@ describe('punteggio', () => {
     for (const [lettere, p] of Object.entries(attesi)) expect(puntiPerLunghezza(Number(lettere))).toBe(p);
   });
 
-  it('ZAPP vale 10 punti in totale', () => {
-    expect(punti('ZAPP', 4)).toBe(10);
+  it('ZELIUS vale 10 punti in totale', () => {
+    expect(punti('ZELIUS', 6)).toBe(10);
     expect(punti('ZAPPA', 5)).toBe(2);
   });
 });
@@ -128,9 +128,9 @@ describe('dizionario vero', () => {
   const buffer = readFileSync(new URL('../public/dizionario.bin', import.meta.url));
   const diz = Dizionario.daBuffer(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength));
 
-  it('contiene parole comuni e ZAPP, ma non nomi propri né pronomi attaccati', () => {
-    for (const p of ['casa', 'squadrone', 'citta', 'zapp', 'mangiavamo']) expect(diz.contiene(inSimboli(p)!), p).toBe(true);
-    for (const p of ['roma', 'andandosene', 'mangiarlo', 'dammi']) expect(diz.contiene(inSimboli(p)!), p).toBe(false);
+  it('contiene parole comuni e ZELIUS, ma non nomi propri né pronomi attaccati', () => {
+    for (const p of ['casa', 'squadrone', 'citta', 'zelius', 'mangiavamo']) expect(diz.contiene(inSimboli(p)!), p).toBe(true);
+    for (const p of ['roma', 'andandosene', 'mangiarlo', 'dammi', 'zapp']) expect(diz.contiene(inSimboli(p)!), p).toBe(false);
   });
 
   it('trova le parole della griglia dei mockup', () => {
