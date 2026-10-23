@@ -17,7 +17,8 @@ export function generaCodice(casuale: () => number = Math.random): string {
 
 /** Normalizza un codice scritto a mano ("k74q " → "K74Q"); null se non valido. */
 export function leggiCodice(testo: string): string | null {
-  const c = testo.trim().toUpperCase();
+  // Accetta anche il link del QR code: https://…/s/K74Q
+  const c = testo.trim().replace(/^.*\/s\//i, '').replace(/\/$/, '').toUpperCase();
   if (c.length !== LUNGHEZZA_CODICE) return null;
   return [...c].every((ch) => CARATTERI_CODICE.includes(ch)) ? c : null;
 }

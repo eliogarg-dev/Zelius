@@ -145,5 +145,11 @@ await luca.locator('.classifica li').first().waitFor({ timeout: 20000 });
 log('Classifica mano 2 (calcolata da Luca):', (await luca.locator('.classifica li').allInnerTexts()).map((r) => r.replace(/\s+/g, ' ')).join(' | '));
 await luca.screenshot({ path: OUT + '7-nuovo-host.png' });
 
+// 6. Luca chiude la stanza dalla finestra di conferma: Marco vede che è chiusa.
+await luca.getByRole('button', { name: 'Chiudi la stanza per tutti' }).click();
+await luca.getByRole('dialog').getByRole('button', { name: 'Chiudi' }).click();
+await marco.getByText('Stanza chiusa').waitFor({ timeout: 15000 });
+log('Stanza chiusa da Luca: ok');
+
 console.log('Errori nelle pagine:', errori.length ? errori : 'nessuno');
 await browser.close();

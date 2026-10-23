@@ -149,6 +149,38 @@ button:disabled {
   justify-content: center;
 }
 
+/* Finestra di conferma (src/lib/conferma.ts) */
+dialog.conferma {
+  width: min(340px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surf);
+  color: var(--text);
+}
+
+dialog.conferma::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}
+
+dialog.conferma p {
+  margin: 0 0 20px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+dialog.conferma form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+dialog.conferma .btn-scelta {
+  border: 0;
+  background: var(--acc);
+  color: var(--on-acc);
+}
+
 /* Scelta tra poche opzioni (griglia, durata, tema...) */
 .segmenti {
   display: grid;

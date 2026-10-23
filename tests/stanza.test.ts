@@ -24,6 +24,7 @@ describe('codice della stanza', () => {
     expect(leggiCodice(' k74q ')).toBe('K74Q');
     expect(leggiCodice('K7')).toBeNull();
     expect(leggiCodice('K7-Q')).toBeNull();
+    expect(leggiCodice('https://zapp.web.app/s/k74q/')).toBe('K74Q');
   });
 });
 

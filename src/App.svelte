@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { App as CapApp } from '@capacitor/app';
   import { firebaseDisponibile } from './lib/firebase.ts';
   import { codiceDaIndirizzo, eApp } from './lib/piattaforma.ts';
   import { applicaTema } from './lib/preferenze.svelte.ts';
@@ -18,6 +19,14 @@
   let occupato = $state(false);
 
   const aggiornaTema = applicaTema();
+
+  // Tasto Indietro di Android: dalla home chiude l'app, dalla stanza non fa nulla (si esce col pulsante, che chiede conferma).
+  if (eApp) {
+    CapApp.addListener('backButton', () => {
+      if (schermata === 'home') CapApp.exitApp();
+      else if (schermata !== 'stanza' && !occupato) schermata = 'home';
+    });
+  }
 
   async function apriStanza(azione: () => Promise<Stanza>) {
     errore = '';

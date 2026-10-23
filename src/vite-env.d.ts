@@ -3,6 +3,8 @@
 
 interface ImportMetaEnv {
   readonly VITE_FIREBASE_EMULATORE?: string;
+  /** Indirizzo degli emulatori se diverso dalla pagina (app sul telefono via USB: 127.0.0.1). */
+  readonly VITE_HOST_EMULATORE?: string;
   readonly VITE_FIREBASE_API_KEY?: string;
   readonly VITE_FIREBASE_AUTH_DOMAIN?: string;
   readonly VITE_FIREBASE_DATABASE_URL?: string;

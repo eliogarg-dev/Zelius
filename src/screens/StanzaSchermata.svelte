@@ -6,6 +6,8 @@
   import QrCode from '../components/QrCode.svelte';
   import RichiesteAccesso from '../components/RichiesteAccesso.svelte';
   import RisultatiMano from '../components/RisultatiMano.svelte';
+  import { Share } from '@capacitor/share';
+  import { conferma } from '../lib/conferma.ts';
   import { linkStanza } from '../lib/piattaforma.ts';
   import type { Stanza } from '../lib/stanza/stanza.svelte.ts';
 
@@ -25,7 +27,8 @@
   async function condividi() {
     const dati = { title: 'Zapp · Paroliere', text: `Gioca con me a Zapp! Stanza ${stanza.codice}`, url: link };
     try {
-      if (navigator.share) await navigator.share(dati);
+      // Nell'app la WebView non ha navigator.share: il plugin usa la condivisione di Android.
+      if ((await Share.canShare()).value) await Share.share(dati);
       else {
         await navigator.clipboard.writeText(link);
         mostra('Link copiato');
@@ -52,15 +55,15 @@
     }
   }
 
-  function esci() {
+  async function esci() {
     if (stanza.eHost) {
-      if (!confirm('Uscendo, la stanza passerà a un altro giocatore con l\'app. Vuoi uscire?')) return;
-    } else if (stanza.accesso === 'dentro' && !confirm('Vuoi uscire dalla stanza?')) return;
+      if (!(await conferma("Uscendo, la stanza passerà a un altro giocatore con l'app. Vuoi uscire?", 'Esci'))) return;
+    } else if (stanza.accesso === 'dentro' && !(await conferma('Vuoi uscire dalla stanza?', 'Esci'))) return;
     onesci();
   }
 
   async function chiudi() {
-    if (!confirm('Chiudere la stanza per tutti?')) return;
+    if (!(await conferma('Chiudere la stanza per tutti?', 'Chiudi'))) return;
     await stanza.chiudi();
     onesci();
   }

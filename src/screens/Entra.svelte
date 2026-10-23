@@ -1,6 +1,7 @@
 <script lang="ts">
   // Nickname (e codice, se si entra) prima di creare o raggiungere una stanza.
   import Icona from '../components/Icona.svelte';
+  import { eApp } from '../lib/piattaforma.ts';
   import { leggiCodice } from '../lib/stanza/logica.ts';
   import { preferenze, salvaPreferenze } from '../lib/preferenze.svelte.ts';
 
@@ -42,6 +43,22 @@
     }
     onconferma(nome, c);
   }
+
+  async function inquadra() {
+    erroreLocale = '';
+    try {
+      const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import('@capacitor/barcode-scanner');
+      const { ScanResult } = await CapacitorBarcodeScanner.scanBarcode({
+        hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+        scanInstructions: 'Inquadra il QR code della stanza',
+      });
+      const c = leggiCodice(ScanResult);
+      if (c) codice = c;
+      else erroreLocale = 'Questo QR code non è di una stanza di Zapp.';
+    } catch {
+      // Scansione annullata o fotocamera negata.
+    }
+  }
 </script>
 
 <div class="testa">
@@ -65,6 +82,9 @@
         spellcheck="false"
         placeholder="K74Q"
       />
+      {#if eApp}
+        <button type="button" class="btn qr" onclick={inquadra}>Inquadra il QR code</button>
+      {/if}
     </div>
   {/if}
   <div>
@@ -109,6 +129,11 @@
     text-transform: uppercase;
     letter-spacing: 0.2em;
     font-size: 24px;
+  }
+
+  .qr {
+    margin-top: 10px;
+    width: 100%;
   }
 
   .errore {

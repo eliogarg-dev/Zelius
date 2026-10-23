@@ -7,12 +7,14 @@ import { connectDatabaseEmulator, getDatabase, onValue, ref, type Database } fro
 
 const emulatore = import.meta.env.VITE_FIREBASE_EMULATORE === '1';
 const progetto = import.meta.env.VITE_FIREBASE_PROJECT_ID ?? 'demo-zapp';
+// Nell'app Capacitor intercetta tutto ciò che va a "localhost": col telefono via USB (adb reverse) si usa 127.0.0.1.
+const hostEmulatore = import.meta.env.VITE_HOST_EMULATORE || location.hostname;
 
 const config = emulatore
   ? {
       apiKey: 'demo',
       projectId: progetto,
-      databaseURL: `http://${location.hostname}:9000?ns=${progetto}-default-rtdb`,
+      databaseURL: `http://${hostEmulatore}:9000?ns=${progetto}-default-rtdb`,
     }
   : {
       apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -36,8 +38,8 @@ export function database(): Database {
     db = getDatabase(app);
     const auth = getAuth(app);
     if (emulatore) {
-      connectDatabaseEmulator(db, location.hostname, 9000);
-      connectAuthEmulator(auth, `http://${location.hostname}:9099`, { disableWarnings: true });
+      connectDatabaseEmulator(db, hostEmulatore, 9000);
+      connectAuthEmulator(auth, `http://${hostEmulatore}:9099`, { disableWarnings: true });
     }
     onValue(ref(db, '.info/serverTimeOffset'), (s) => (scarto = Number(s.val()) || 0));
   }
