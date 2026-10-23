@@ -1,12 +1,16 @@
 <script lang="ts">
-  // Griglia, durata, lunghezza minima e avanzamento: un tocco passa al valore successivo.
+  // Griglia, durata, lunghezza minima e avanzamento: un tocco passa al valore successivo. L'attesa si regola con − e +.
   import type { Impostazioni } from '../lib/stanza/stanza.svelte.ts';
 
   let {
     impostazioni,
+    nomeHost,
     modificabili,
     oncambia,
-  }: { impostazioni: Impostazioni; modificabili: boolean; oncambia: (i: Impostazioni) => void } = $props();
+  }: { impostazioni: Impostazioni; nomeHost: string; modificabili: boolean; oncambia: (i: Impostazioni) => void } = $props();
+
+  const orologio = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  const attesa = (passo: number) => oncambia({ ...impostazioni, attesa: Math.min(300, Math.max(10, impostazioni.attesa + passo)) });
 
   function successivo<T>(valori: readonly T[], attuale: T): T {
     return valori[(valori.indexOf(attuale) + 1) % valori.length];
@@ -40,13 +44,27 @@
   </button>
   <button
     type="button"
-    class="intera"
+    class={impostazioni.automatico ? 'doppia' : 'intera'}
     disabled={!modificabili}
-    aria-label={`Prossima mano ${impostazioni.automatico ? 'automatica' : "avviata dall'host"}${modificabili ? ', tocca per cambiare' : ''}`}
+    aria-label={`Prossima mano ${impostazioni.automatico ? 'automatica' : `avviata da ${nomeHost}`}${modificabili ? ', tocca per cambiare' : ''}`}
     onclick={() => oncambia({ ...impostazioni, automatico: !impostazioni.automatico })}
   >
-    <span class="nome">Prossima mano</span><span class="valore display">{impostazioni.automatico ? 'Automatica' : "La avvia l'host"}</span>
+    <span class="nome">Prossima mano</span><span class="valore display">{impostazioni.automatico ? 'Automatica' : `La avvia ${nomeHost}`}</span>
   </button>
+  {#if impostazioni.automatico}
+    <div class="casella">
+      <span class="nome">Attesa</span>
+      <div class="passi">
+        {#if modificabili}
+          <button type="button" class="passo" aria-label="Meno 10 secondi" disabled={impostazioni.attesa <= 10} onclick={() => attesa(-10)}>−</button>
+        {/if}
+        <span class="valore display" aria-label={`Attesa ${impostazioni.attesa} secondi`}>{orologio(impostazioni.attesa)}</span>
+        {#if modificabili}
+          <button type="button" class="passo" aria-label="Più 10 secondi" disabled={impostazioni.attesa >= 300} onclick={() => attesa(10)}>+</button>
+        {/if}
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -56,7 +74,8 @@
     gap: 8px;
   }
 
-  button {
+  button,
+  .casella {
     min-height: 60px;
     background: var(--surf);
     border: 1px solid var(--line);
@@ -70,6 +89,29 @@
 
   .intera {
     grid-column: 1 / -1;
+  }
+
+  .doppia {
+    grid-column: span 2;
+  }
+
+  .passi {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .passo {
+    min-height: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .passo:disabled {
+    opacity: 0.35;
   }
 
   button:disabled {

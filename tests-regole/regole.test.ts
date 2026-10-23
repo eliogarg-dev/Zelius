@@ -71,7 +71,13 @@ describe('creazione della stanza', () => {
     await assertFails(db('host').ref(`${S}/impostazioni`).set({ lato: 6, durata: 180, minLettere: 5 }));
     await assertSucceeds(db('host').ref(`${S}/impostazioni/automatico`).set(true));
     await assertFails(db('host').ref(`${S}/impostazioni/automatico`).set('sì'));
+    await assertSucceeds(db('host').ref(`${S}/impostazioni/attesa`).set(10));
+    await assertFails(db('host').ref(`${S}/impostazioni/attesa`).set(5));
+    await assertFails(db('host').ref(`${S}/impostazioni/attesa`).set(15));
     await assertFails(db('bob').ref(`${S}/impostazioni/lato`).set(5));
+    await assertSucceeds(db('host').ref(`${S}/meta/pausa`).set(true));
+    await assertFails(db('host').ref(`${S}/meta/pausa`).set('sì'));
+    await assertFails(db('bob').ref(`${S}/meta/pausa`).set(false));
   });
 });
 

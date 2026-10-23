@@ -23,6 +23,11 @@
   let avviso = $state('');
   let pannello: 'richieste' | 'impostazioni' | null = $state(null);
   let avviando = $state(false);
+  // Avanzamento automatico fermato per chi aspetta di entrare: l'host trova subito le richieste aperte.
+  const inPausa = $derived(stanza.meta?.pausa === true);
+  $effect(() => {
+    if (stanza.eHost && inPausa) pannello = 'richieste';
+  });
 
   async function condividi() {
     const dati = { title: 'Zelius · Paroliere', text: `Gioca con me a Zelius! Stanza ${stanza.codice}`, url: link };
@@ -100,7 +105,7 @@
       <div class="pannello"><RichiesteAccesso {stanza} altezza="260px" /></div>
     {:else if pannello === 'impostazioni'}
       <div class="pannello">
-        <ImpostazioniStanza impostazioni={stanza.impostazioni} modificabili oncambia={(i) => stanza.cambiaImpostazioni(i)} />
+        <ImpostazioniStanza impostazioni={stanza.impostazioni} {nomeHost} modificabili oncambia={(i) => stanza.cambiaImpostazioni(i)} />
         <p class="muted piccolo">Valgono dalla prossima mano.</p>
       </div>
     {/if}
@@ -146,7 +151,7 @@
   </div>
 
   <div class="sezione">
-    <ImpostazioniStanza impostazioni={stanza.impostazioni} modificabili={stanza.eHost} oncambia={(i) => stanza.cambiaImpostazioni(i)} />
+    <ImpostazioniStanza impostazioni={stanza.impostazioni} {nomeHost} modificabili={stanza.eHost} oncambia={(i) => stanza.cambiaImpostazioni(i)} />
   </div>
 
   {#if stanza.eHost}
@@ -173,6 +178,7 @@
       trovate={stanza.mieParole}
       verifica={(p) => stanza.proponi(p)}
       onfine={() => {}}
+      inAttesa={stanza.eHost ? numeroRichieste : 0}
     />
   {/key}
 {:else if stanza.fase === 'spettatore'}
@@ -193,9 +199,11 @@
       ? `Prossima mano tra ${orologio(alInizio)}`
       : stanza.fase === 'finita'
         ? 'Nessuno con l\'app può preparare altre griglie'
-        : stanza.impostazioni.automatico
+        : stanza.impostazioni.automatico && !inPausa
           ? 'Prossima mano in preparazione…'
-          : stanza.eHost
+          : stanza.eHost && inPausa
+            ? 'Fai entrare chi aspetta, poi riparti'
+            : stanza.eHost
             ? 'Avvia la prossima mano quando volete'
             : `Aspetta che ${nomeHost} avvii la prossima mano`,
     true,
@@ -204,7 +212,7 @@
   {#if stanza.risultati}
     <div class="sezione"><RisultatiMano {stanza} risultati={stanza.risultati} /></div>
   {/if}
-  {#if stanza.eHost && stanza.fase === 'risultati' && !stanza.impostazioni.automatico}
+  {#if stanza.eHost && stanza.fase === 'risultati' && (!stanza.impostazioni.automatico || inPausa)}
     <button
       type="button"
       class="btn btn-primario in-fondo"

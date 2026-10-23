@@ -207,9 +207,16 @@
     font-weight: 500;
   }
 
+  /* Arrivata in cima la griglia resta ferma e scorrono solo le parole.
+     Sfondo a tutta larghezza (oltre il padding di #app) per coprirle. */
   .griglia-risultati {
-    margin: 16px auto 8px;
-    width: 72%;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 16px -20px 8px;
+    padding: max(8px, env(safe-area-inset-top)) calc(14% + 20px) 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
   }
 
   .suggerimento {

@@ -19,6 +19,7 @@
     verifica,
     onfine,
     onesci,
+    inAttesa = 0,
   }: {
     griglia: number[];
     /** Istante di fine mano, in millisecondi dell'orologio locale. */
@@ -30,6 +31,8 @@
     verifica: (p: Proposta) => Promise<Esito>;
     onfine: () => void;
     onesci?: () => void;
+    /** Giocatori che aspettano di entrare (solo per l'host): entreranno a fine mano. */
+    inAttesa?: number;
   } = $props();
 
   let adesso = $state(Date.now());
@@ -89,6 +92,11 @@
     {/if}
     <div class="pillola">{intestazione}</div>
     <div class="punteggio"><strong class="display">{totale}</strong> punti</div>
+    {#if inAttesa > 0}
+      <div class="campanella" role="status" aria-label={`${inAttesa} in attesa di entrare: potrai farli entrare a fine mano`}>
+        <Icona nome="campanella" /> ({inAttesa})
+      </div>
+    {/if}
   </div>
 
   <div class="tempo">
@@ -159,6 +167,26 @@
     margin-left: auto;
     font-size: 15px;
     color: var(--muted);
+  }
+
+  .campanella {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-weight: 700;
+    color: var(--warm);
+    animation: squilla 2s infinite;
+  }
+
+  /* Si ingrandisce un po' e vibra, poi resta ferma fino al giro dopo. */
+  @keyframes squilla {
+    0%, 40%, 100% { transform: none; }
+    5% { transform: scale(1.2) rotate(-14deg); }
+    10% { transform: scale(1.2) rotate(12deg); }
+    15% { transform: scale(1.2) rotate(-10deg); }
+    20% { transform: scale(1.2) rotate(8deg); }
+    25% { transform: scale(1.2) rotate(-4deg); }
+    30% { transform: scale(1.1); }
   }
 
   .punteggio strong {

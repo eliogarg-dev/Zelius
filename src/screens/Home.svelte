@@ -88,10 +88,10 @@
   }
 
   .azioni {
-    margin-top: auto;
+    margin: auto 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
   }
 
   .grande {

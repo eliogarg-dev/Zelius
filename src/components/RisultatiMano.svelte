@@ -248,9 +248,16 @@
     margin: 14px 0 10px;
   }
 
+  /* Arrivata in cima la griglia resta ferma e scorrono solo le parole.
+     Sfondo a tutta larghezza (oltre il padding di #app) per coprirle. */
   .mini-griglia {
-    width: 60%;
-    margin: 0 auto 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0 -20px 12px;
+    padding: max(8px, env(safe-area-inset-top)) calc(20% + 20px) 8px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
   }
 
   .segnala {

@@ -37,6 +37,8 @@ export interface Meta {
   creata: number;
   stato: 'attesa' | 'gioco';
   mano?: number;
+  /** Avanzamento automatico fermato a fine mano perché qualcuno aspetta di entrare: riparte l'host. */
+  pausa?: boolean;
 }
 
 export interface Impostazioni {
@@ -45,6 +47,8 @@ export interface Impostazioni {
   minLettere: 4 | 5 | 6;
   /** Se falso, la mano successiva parte solo quando l'host la avvia. */
   automatico: boolean;
+  /** Secondi di attesa prima della mano automatica (10–300, a passi di 10). */
+  attesa: number;
 }
 
 export interface Giocatore {
@@ -89,12 +93,10 @@ export interface RisultatiVisti {
 export type Accesso = 'caricamento' | 'inesistente' | 'richiesta' | 'rifiutato' | 'bloccato' | 'dentro' | 'chiusa' | 'errore';
 export type Fase = 'attesa' | 'conto' | 'gioco' | 'spettatore' | 'risultati' | 'finita';
 
-/** Pausa tra una mano e l'altra. */
-export const PAUSA_MS = 45_000;
 /** Tolleranza per le parole inviate negli ultimi istanti (deve stare sotto i 3 s delle regole). */
 const TOLLERANZA_MS = 2500;
 
-export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = { lato: 4, durata: 120, minLettere: 4, automatico: false };
+export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = { lato: 4, durata: 120, minLettere: 4, automatico: false, attesa: 60 };
 
 export class Stanza {
   readonly codice: string;
@@ -188,7 +190,7 @@ export class Stanza {
     this.ascolti.push(
       onValue(this.figlio('meta'), (s) => this.aggiornaMeta(s.val())),
       onValue(this.figlio('impostazioni'), (s) => {
-        if (s.exists()) this.impostazioni = s.val();
+        if (s.exists()) this.impostazioni = { ...IMPOSTAZIONI_PREDEFINITE, ...s.val() };
       }),
       onValue(
         this.figlio(`giocatori/${this.uid}`),
@@ -372,9 +374,9 @@ export class Stanza {
     }
 
     // Nuovo host subentrato (o avanzamento automatico appena attivato) quando i risultati erano già scritti ma la mano successiva no.
-    if (this.impostazioni.automatico && this.eHost && this.meta.stato === 'gioco' && m && this.meta.mano === m.n && manoFinita && !this.lavorando && this.risultati?.n === m.n && this.risultati.dati) {
+    if (this.impostazioni.automatico && !this.meta.pausa && this.eHost && this.meta.stato === 'gioco' && m && this.meta.mano === m.n && manoFinita && !this.lavorando && this.risultati?.n === m.n && this.risultati.dati) {
       this.lavorando = true;
-      this.preparaMano(m.n + 1, Math.max(m.fine + PAUSA_MS, oraServer() + 10_000))
+      this.proseguiAutomatico(m)
         .catch((e) => console.error('Errore nel preparare la mano', e))
         .finally(() => (this.lavorando = false));
     }
@@ -448,12 +450,18 @@ export class Stanza {
       const r = calcolaRisultati(parole.val() ?? {}, new Set(soluzioni), precedenti?.val() ?? {}, partecipanti);
       await set(this.figlio(`risultati/${m.n}`), r).catch(() => {});
       this.soluzioniPreparate.delete(m.n);
-      if (this.impostazioni.automatico) await this.preparaMano(m.n + 1, Math.max(m.fine + PAUSA_MS, oraServer() + 10_000));
+      if (this.impostazioni.automatico && !this.meta?.pausa) await this.proseguiAutomatico(m);
     } catch (e) {
       console.error('Errore nel chiudere la mano', e);
     } finally {
       this.lavorando = false;
     }
+  }
+
+  /** Con giocatori in attesa ci si ferma: l'host li fa entrare e riparte con "Prossima mano". */
+  private async proseguiAutomatico(m: ManoCorrente) {
+    if (Object.keys(this.richieste).length > 0) await set(this.figlio('meta/pausa'), true);
+    else await this.preparaMano(m.n + 1, Math.max(m.fine + this.impostazioni.attesa * 1000, oraServer() + 10_000));
   }
 
   private async preparaMano(n: number, inizio: number) {
@@ -475,6 +483,7 @@ export class Stanza {
       [`soluzioni/${n}`]: parole.join(' '),
       'meta/mano': n,
       'meta/stato': 'gioco',
+      'meta/pausa': null,
     });
   }
 

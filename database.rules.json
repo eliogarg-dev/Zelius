@@ -18,6 +18,7 @@
           "creata": { ".validate": "newData.isNumber()" },
           "stato": { ".validate": "newData.val() === 'attesa' || newData.val() === 'gioco'" },
           "mano": { ".validate": "newData.isNumber() && newData.val() >= 1" },
+          "pausa": { ".validate": "newData.isBoolean()" },
           "$altro": { ".validate": false }
         },
 
@@ -29,6 +30,7 @@
           "durata": { ".validate": "newData.val() === 60 || newData.val() === 120 || newData.val() === 180" },
           "minLettere": { ".validate": "newData.val() === 4 || newData.val() === 5 || newData.val() === 6" },
           "automatico": { ".validate": "newData.isBoolean()" },
+          "attesa": { ".validate": "newData.isNumber() && newData.val() >= 10 && newData.val() <= 300 && newData.val() % 10 === 0" },
           "$altro": { ".validate": false }
         },
 
