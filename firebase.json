@@ -2,7 +2,11 @@
   "database": {
     "rules": "database.rules.json"
   },
+  "auth": {
+    "providers": { "anonymous": true }
+  },
   "hosting": {
+    "site": "zelius",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*"],
     "rewrites": [{ "source": "/s/**", "destination": "/index.html" }],

@@ -11,8 +11,8 @@ Ultimo aggiornamento: 2026-10-23.
 |---|---|---|
 | 1 | Dizionario e ricerca delle parole | ✅ Fatta |
 | 2 | Allenamento da soli | ✅ Fatta |
-| 3 | Stanze su Firebase | ✅ Fatta e collaudata con gli emulatori (manca il progetto Firebase vero) |
-| 4 | Versione browser | 🟡 In gran parte fatta (stessa app con `?web=1` / link `/s/CODICE`); manca la pubblicazione su Firebase Hosting |
+| 3 | Stanze su Firebase | ✅ Fatta, collaudata con gli emulatori e sul progetto vero `zelius-34580` |
+| 4 | Versione browser | ✅ Online su https://zelius.web.app (link delle stanze `/s/CODICE`) |
 | 5 | App Android con Capacitor + rifiniture | 🟡 App fatta e provata su un Galaxy A72 (Android 14) con gli emulatori: allenamento, creazione stanza, condivisione, scanner QR, tasto Indietro. Mancano le rifiniture |
 
 ## Cosa c'è
@@ -24,6 +24,14 @@ Ultimo aggiornamento: 2026-10-23.
 - **Regole di sicurezza** (`database.rules.json`) con 19 test sull'emulatore.
 - **App Android** (`android/`, `capacitor.config.json`, id `dev.eliogarg.zelius`): Capacitor 8, minSdk 26. Scanner QR in "Entra" (`@capacitor/barcode-scanner`, il codice si legge anche dal link), condivisione nativa (`@capacitor/share`: nella WebView `navigator.share` non c'è), tasto Indietro (dalla home chiude l'app, nella stanza non fa nulla, altrove torna alla home). Icona e splash generati da `assets/*.png` con `npx @capacitor/assets generate --android`.
 
+## Firebase
+
+- Progetto **zelius-34580** (account elio.softlab@gmail.com, piano gratuito Spark). Console: https://console.firebase.google.com/project/zelius-34580/overview
+- Realtime Database `zelius-34580-default-rtdb` in **europe-west1**; accesso anonimo attivo; sito **zelius** → https://zelius.web.app
+- Chiavi in `.env.production` (pubbliche per natura, nel repository): `npm run build` e `npm run android` le usano da sole.
+- Pubblicare: `npm run build`, poi `npx firebase deploy --only database,auth,hosting` (regole, accesso anonimo e sito; `firebase.json` contiene tutto). Serve `npx firebase login` con l'account sopra.
+- Il database predefinito è stato creato con l'API di firebase-tools (`createInstance`), perché `firebase init database` è solo interattivo.
+
 ## Scelte prese durante l'implementazione (non nel design)
 
 - Elenco cifrato con un'impronta non crittografica (cyrb53 + sale): funziona anche su pagine non https, utile per provare in rete locale. Il design parlava di SHA-256: la protezione è comunque solo contro l'imbroglio occasionale.
@@ -33,12 +41,10 @@ Ultimo aggiornamento: 2026-10-23.
 
 ## Prossimi passi
 
-1. **Progetto Firebase vero** (serve l'account Google dell'utente): creare il progetto, attivare Authentication anonima e Realtime Database, creare `.env.production` con le chiavi (vedi `src/vite-env.d.ts`), pubblicare regole e hosting (`node scripts/firebase.mjs deploy`).
-   Le chiavi vanno messe **prima** di compilare l'app: senza, l'app ha solo l'allenamento. Va impostato anche `VITE_URL_PUBBLICO`, altrimenti i link e i QR creati dall'app non hanno l'indirizzo del sito.
-2. Provare una partita vera tra più telefoni (serve il progetto Firebase).
+1. Provare una partita con più persone vere (telefoni con l'app e browser).
+2. Pubblicare l'app: APK firmato o Play Store (serve una chiave di firma; l'APK di debug va bene solo per le prove).
 3. Facoltativo: aprire i link `/s/CODICE` direttamente nell'app (App Links: serve `assetlinks.json` sull'hosting).
-4. Rifiniture fatte: finestre di conferma in italiano (`src/lib/conferma.ts` con `<dialog>`, al posto di `confirm()` che nell'app mostra CANCEL/OK). Già presenti nel codice: tempo che manca per chi entra a mano iniziata, "Vedi tutti" nei giocatori. Da fare: partita vera con più telefoni.
-
+4. Rifiniture fatte: finestre di conferma in italiano (`src/lib/conferma.ts` con `<dialog>`, al posto di `confirm()` che nell'app mostra CANCEL/OK). Già presenti nel codice: tempo che manca per chi entra a mano iniziata, "Vedi tutti" nei giocatori.
 ## Preparare un altro PC
 
 1. Installare **Node.js 24 LTS** e **git**.
