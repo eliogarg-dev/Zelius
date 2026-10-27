@@ -1,5 +1,6 @@
 <script lang="ts">
-  // Griglia, durata, lunghezza minima e avanzamento: un tocco passa al valore successivo. L'attesa si regola con − e +.
+  // Griglia, durata, lunghezza minima, avanzamento e voto sulle scartate: un tocco passa al valore successivo.
+  // L'attesa si regola con − e +.
   import type { Impostazioni } from '../lib/stanza/stanza.svelte.ts';
 
   let {
@@ -65,6 +66,15 @@
       </div>
     </div>
   {/if}
+  <button
+    type="button"
+    class="intera"
+    disabled={!modificabili}
+    aria-label={`Parole scartate: ${impostazioni.voto ? 'a fine mano se ne possono far votare due a testa' : 'non si votano'}${modificabili ? ', tocca per cambiare' : ''}`}
+    onclick={() => oncambia({ ...impostazioni, voto: !impostazioni.voto })}
+  >
+    <span class="nome">Parole scartate</span><span class="valore display">{impostazioni.voto ? 'Ai voti, 2 a testa' : 'Non si votano'}</span>
+  </button>
 </div>
 
 <style>

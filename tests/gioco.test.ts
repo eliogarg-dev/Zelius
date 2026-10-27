@@ -92,6 +92,13 @@ describe('risolutore', () => {
     expect(trovaParole(GRIGLIA, diz, 5).map((s) => s.parola)).toEqual(['QUADRO', 'CARTE']);
   });
 
+  it('aggiunge le parole approvate se sono nella griglia', () => {
+    const diz = dizionarioDi(['casa', 'quadro']);
+    const parole = trovaParole(GRIGLIA, diz, 4, ['LADRI', 'TRENO', 'CASA', 'SQUA']).map((s) => s.parola);
+    expect(parole).toEqual(['QUADRO', 'LADRI', 'CASA', 'SQUA']);
+    expect(trovaParole(GRIGLIA, diz, 6, ['LADRI']).map((s) => s.parola)).toEqual(['QUADRO']);
+  });
+
   it('dice se una parola è componibile nella griglia', () => {
     expect(trovaPercorso(inSimboli('squadra')!, GRIGLIA)).toEqual([4, 5, 8, 9, 10, 7]);
     expect(trovaPercorso(inSimboli('treno')!, GRIGLIA)).toBeNull();
@@ -165,7 +172,7 @@ describe('dizionario vero', () => {
 
   it('prepara una mano 5x5 giocabile in poco tempo', () => {
     const inizio = performance.now();
-    const mano = preparaMano(5, 4, diz, casualeConSeme(7));
+    const mano = preparaMano(5, 4, diz, [], casualeConSeme(7));
     expect(mano.soluzioni.length).toBeGreaterThanOrEqual(60);
     expect(performance.now() - inizio).toBeLessThan(2000);
   });

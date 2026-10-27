@@ -7,6 +7,7 @@
   import type { RisultatiVisti, Stanza } from '../lib/stanza/stanza.svelte.ts';
   import ElencoParole, { type VoceParola } from './ElencoParole.svelte';
   import Griglia from './Griglia.svelte';
+  import VotoParole from './VotoParole.svelte';
 
   let { stanza, risultati }: { stanza: Stanza; risultati: RisultatiVisti } = $props();
 
@@ -31,8 +32,9 @@
       const s = inSimboli(parola);
       return s ? punti(parola, numeroLettere(s)) : 0;
     };
-    const dalleSoluzioni = risultati.soluzioni ?? Object.keys(trovate);
-    return dalleSoluzioni
+    // Le parole approvate col voto non sono tra le soluzioni: si aggiungono da quelle trovate.
+    const tutte = new Set([...(risultati.soluzioni ?? []), ...Object.keys(trovate)]);
+    return [...tutte]
       .map((parola) => {
         const chi = (trovate[parola] ?? '').split(' ').filter(Boolean);
         const mia = chi.includes(stanza.uid);
@@ -42,7 +44,9 @@
           punti: valore(parola),
           mia,
           mancata: chi.length === 0,
-          dettaglio: chi.length ? `Trovata da ${elencoNomi(nomi)}` : 'Solo il computer',
+          dettaglio: chi.length
+            ? `Trovata da ${elencoNomi(nomi)}${risultati.esiti[parola] ? ' · valida col voto' : ''}`
+            : 'Solo il computer',
         };
       })
       .sort((a, b) => Number(a.mancata) - Number(b.mancata) || b.punti - a.punti || a.parola.localeCompare(b.parola));
@@ -67,6 +71,10 @@
     apriSegnala = false;
   }
 </script>
+
+{#if risultati.voto && risultati.dati && stanza.fase !== 'finita'}
+  <VotoParole {stanza} {risultati} />
+{/if}
 
 <div class="tab" role="tablist">
   <button type="button" role="tab" aria-selected={tab === 'classifica'} onclick={() => (tab = 'classifica')}>Classifica</button>

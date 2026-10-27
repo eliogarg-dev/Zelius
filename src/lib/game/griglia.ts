@@ -62,12 +62,13 @@ export function preparaMano(
   lato: Lato,
   minLettere: number,
   diz: Dizionario,
+  aggiunte: readonly string[] = [],
   casuale: () => number = Math.random,
 ): Mano {
   let migliore: Mano | null = null;
   for (let tentativo = 0; tentativo < 50; tentativo++) {
     const griglia = generaGriglia(lato, casuale);
-    const soluzioni = trovaParole(griglia, diz, minLettere);
+    const soluzioni = trovaParole(griglia, diz, minLettere, aggiunte);
     if (!migliore || soluzioni.length > migliore.soluzioni.length) migliore = { griglia, soluzioni };
     if (soluzioni.length >= MIN_PAROLE[lato]) break;
   }

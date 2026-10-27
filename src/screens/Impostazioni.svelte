@@ -1,5 +1,7 @@
 <script lang="ts">
   import Icona from '../components/Icona.svelte';
+  import { conferma } from '../lib/conferma.ts';
+  import { paroleAggiunte, togliParola } from '../lib/paroleAggiunte.svelte.ts';
   import { preferenze, salvaPreferenze, type Tema } from '../lib/preferenze.svelte.ts';
 
   let { onesci, onTema }: { onesci: () => void; onTema: () => void } = $props();
@@ -14,6 +16,10 @@
     preferenze.tema = t;
     salvaPreferenze();
     onTema();
+  }
+
+  async function togli(parola: string) {
+    if (await conferma(`Togliere ${parola} dalle parole aggiunte?`, 'Togli')) togliParola(parola);
   }
 </script>
 
@@ -45,6 +51,21 @@
     </div>
     <p class="muted nota">Automatico segue il tema del telefono.</p>
   </div>
+
+  {#if paroleAggiunte.length}
+    <div>
+      <div class="etichetta">Parole aggiunte ({paroleAggiunte.length})</div>
+      <ul class="aggiunte">
+        {#each paroleAggiunte as parola (parola)}
+          <li>
+            <span class="display">{parola}</span>
+            <button type="button" class="togli" aria-label={`Togli ${parola}`} onclick={() => togli(parola)}><Icona nome="chiudi" /></button>
+          </li>
+        {/each}
+      </ul>
+      <p class="muted nota">Approvate da tutti nelle tue stanze: valgono nelle griglie preparate da questo telefono.</p>
+    </div>
+  {/if}
 
   <details class="licenze muted">
     <summary>Licenze e fonti</summary>
@@ -82,6 +103,37 @@
   .nota {
     font-size: 14px;
     margin: 8px 0 0;
+  }
+
+  .aggiunte {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .aggiunte li {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding-left: 12px;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: var(--surf);
+  }
+
+  .togli {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .licenze {

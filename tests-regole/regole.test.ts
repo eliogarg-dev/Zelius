@@ -72,6 +72,8 @@ describe('creazione della stanza', () => {
     await assertSucceeds(db('host').ref(`${S}/impostazioni/automatico`).set(true));
     await assertFails(db('host').ref(`${S}/impostazioni/automatico`).set('sì'));
     await assertSucceeds(db('host').ref(`${S}/impostazioni/attesa`).set(10));
+    await assertSucceeds(db('host').ref(`${S}/impostazioni/voto`).set(true));
+    await assertFails(db('host').ref(`${S}/impostazioni/voto`).set('sì'));
     await assertFails(db('host').ref(`${S}/impostazioni/attesa`).set(5));
     await assertFails(db('host').ref(`${S}/impostazioni/attesa`).set(15));
     await assertFails(db('bob').ref(`${S}/impostazioni/lato`).set(5));
@@ -177,6 +179,49 @@ describe('durante la mano', () => {
     const interruzione = { 'mani/1/fine': Date.now(), 'meta/pausa': true, 'meta/interrotta': 'Host' };
     await assertFails(db('bob').ref(S).update(interruzione));
     await assertSucceeds(db('host').ref(S).update(interruzione));
+  });
+});
+
+describe('voto sulle parole scartate', () => {
+  // Mano iniziata dopo l'ingresso di tutti (l'ultimo entra 40 s fa).
+  async function conVoto(voto: boolean, fine = Date.now() - 1000) {
+    await preparaStanza({ inizio: fine - 30_000, fine });
+    await env.withSecurityRulesDisabled((ctx) => ctx.database().ref(`${S}/mani/1/voto`).set(voto));
+  }
+
+  it('a mano finita ognuno propone al massimo due parole sue', async () => {
+    await conVoto(true);
+    await assertSucceeds(db('bob').ref(`${S}/proposte/1/bob/0`).set('CARTSE'));
+    await assertSucceeds(db('bob').ref(`${S}/proposte/1/bob/1`).set('TRAS'));
+    await assertFails(db('bob').ref(`${S}/proposte/1/bob/2`).set('ALTRA'));
+    await assertFails(db('bob').ref(`${S}/proposte/1/bob/0`).set('ALTRA'));
+    await assertFails(db('bob').ref(`${S}/proposte/1/web/0`).set('ALTRA'));
+    await assertFails(db('web').ref(`${S}/proposte/1/web/0`).set('casa'));
+    await assertSucceeds(db('web').ref(`${S}/proposte/1`).get());
+  });
+
+  it('niente proposte se il voto è spento o la mano è in corso', async () => {
+    await conVoto(false);
+    await assertFails(db('bob').ref(`${S}/proposte/1/bob/0`).set('CARTSE'));
+    await conVoto(true, Date.now() + 60_000);
+    await assertFails(db('bob').ref(`${S}/proposte/1/bob/0`).set('CARTSE'));
+  });
+
+  it('ognuno vota una volta sola, e solo per sé', async () => {
+    await conVoto(true);
+    await assertSucceeds(db('web').ref(`${S}/voti/1/CARTSE/web`).set(true));
+    await assertFails(db('web').ref(`${S}/voti/1/CARTSE/web`).set(false));
+    await assertFails(db('web').ref(`${S}/voti/1/CARTSE/bob`).set(false));
+    await assertFails(db('web').ref(`${S}/voti/1/ALTRA/web`).set('sì'));
+  });
+
+  it('solo l\'host chiude il voto e aggiorna i punti della mano', async () => {
+    await conVoto(true);
+    await db('host').ref(`${S}/risultati/1`).set({ punti: { bob: 3 }, totali: { bob: 3 } });
+    const approvata = { 'esiti/1/CARTSE': true, 'risultati/1/punti/bob': 6, 'risultati/1/totali/bob': 6, 'risultati/1/trovate/CARTSE': 'bob' };
+    await assertFails(db('bob').ref(S).update(approvata));
+    await assertSucceeds(db('host').ref(S).update(approvata));
+    await assertFails(db('host').ref(`${S}/esiti/1/CARTSE`).set(false));
   });
 });
 

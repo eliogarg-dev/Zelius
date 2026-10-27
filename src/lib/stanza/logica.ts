@@ -96,6 +96,41 @@ export function calcolaRisultati(
   return r;
 }
 
+// ---------- Parole scartate messe ai voti ----------
+
+/** Parole scartate che ogni giocatore può far votare in una mano. */
+export const MAX_PROPOSTE = 2;
+
+export type StatoVoto = 'attesa' | 'approvata' | 'rifiutata';
+
+/**
+ * Esito del voto su una parola: basta un no per scartarla, ed è approvata quando hanno detto sì
+ * tutti gli elettori (i giocatori della mano ancora online) tranne chi l'ha proposta.
+ */
+export function esitoVoto(
+  voti: Record<string, boolean>,
+  proponenti: readonly string[],
+  elettori: readonly string[],
+): { stato: StatoVoto; mancano: string[] } {
+  const devono = elettori.filter((uid) => !proponenti.includes(uid));
+  if (devono.some((uid) => voti[uid] === false)) return { stato: 'rifiutata', mancano: [] };
+  const mancano = devono.filter((uid) => voti[uid] !== true);
+  return { stato: mancano.length ? 'attesa' : 'approvata', mancano };
+}
+
+/** Per ogni parola proposta, chi l'ha proposta (dalle proposte scritte come uid → [parole]). */
+export function proponentiPerParola(proposte: Record<string, Record<string, string> | string[] | undefined>): Map<string, string[]> {
+  const chi = new Map<string, string[]>();
+  for (const [uid, parole] of Object.entries(proposte)) {
+    for (const parola of Object.values(parole ?? {})) {
+      if (typeof parola !== 'string') continue;
+      const elenco = chi.get(parola) ?? [];
+      if (!elenco.includes(uid)) chi.set(parola, [...elenco, uid].sort());
+    }
+  }
+  return chi;
+}
+
 // ---------- Cambio di host ----------
 
 export interface GiocatoreElezione {

@@ -1,6 +1,6 @@
 // Trova tutte le parole del dizionario presenti in una griglia.
 
-import { inParola, numeroLettere } from './alfabeto.ts';
+import { inParola, inSimboli, numeroLettere } from './alfabeto.ts';
 import type { Dizionario } from './dawg.ts';
 import { punti } from './punteggio.ts';
 
@@ -42,8 +42,14 @@ export function latoDi(griglia: readonly number[]): number {
 /**
  * Tutte le parole lunghe almeno `minLettere` che si possono comporre nella griglia,
  * ordinate per punti (decrescenti) e poi in ordine alfabetico.
+ * `aggiunte` sono parole fuori dal dizionario (quelle approvate nelle stanze), cercate una per una.
  */
-export function trovaParole(griglia: readonly number[], diz: Dizionario, minLettere: number): Soluzione[] {
+export function trovaParole(
+  griglia: readonly number[],
+  diz: Dizionario,
+  minLettere: number,
+  aggiunte: readonly string[] = [],
+): Soluzione[] {
   const vicini = adiacenze(latoDi(griglia));
   const usate = new Array<boolean>(griglia.length).fill(false);
   const trovate = new Map<string, Soluzione>();
@@ -77,6 +83,14 @@ export function trovaParole(griglia: readonly number[], diz: Dizionario, minLett
   }
 
   for (let i = 0; i < griglia.length; i++) esplora(i, diz.radice);
+
+  for (const parola of aggiunte) {
+    const s = inSimboli(parola);
+    if (!s || trovate.has(parola)) continue;
+    const lettere = numeroLettere(s);
+    const p = lettere >= minLettere ? trovaPercorso(s, griglia) : null;
+    if (p) trovate.set(parola, { parola, lettere, punti: punti(parola, lettere), percorso: p });
+  }
 
   return [...trovate.values()].sort((a, b) => b.punti - a.punti || a.parola.localeCompare(b.parola));
 }

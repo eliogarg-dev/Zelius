@@ -5,6 +5,7 @@ import {
   calcolaRisultati,
   elencoCifrato,
   elencoNomi,
+  esitoVoto,
   generaCodice,
   grigliaDaTesto,
   grigliaInTesto,
@@ -12,6 +13,7 @@ import {
   leggiCodice,
   nomeLibero,
   nuovoHost,
+  proponentiPerParola,
 } from '../src/lib/stanza/logica.ts';
 
 describe('codice della stanza', () => {
@@ -74,6 +76,31 @@ describe('risultati della mano', () => {
   it('mantiene i totali di chi non ha giocato questa mano', () => {
     const r = calcolaRisultati({}, soluzioni, { vecchio: 30 }, ['nuovo']);
     expect(r.totali).toEqual({ vecchio: 30, nuovo: 0 });
+  });
+});
+
+describe('voto sulle parole scartate', () => {
+  it('serve il sì di tutti gli altri giocatori online', () => {
+    expect(esitoVoto({}, ['giulia'], ['giulia', 'marco', 'sara'])).toEqual({ stato: 'attesa', mancano: ['marco', 'sara'] });
+    expect(esitoVoto({ marco: true }, ['giulia'], ['giulia', 'marco', 'sara'])).toEqual({ stato: 'attesa', mancano: ['sara'] });
+    expect(esitoVoto({ marco: true, sara: true }, ['giulia'], ['giulia', 'marco', 'sara']).stato).toBe('approvata');
+  });
+
+  it('basta un no per scartarla', () => {
+    expect(esitoVoto({ marco: true, sara: false }, ['giulia'], ['giulia', 'marco', 'sara']).stato).toBe('rifiutata');
+  });
+
+  it('non aspetta chi è uscito e conta come sì chi l\'ha proposta', () => {
+    expect(esitoVoto({ marco: true }, ['giulia', 'sara'], ['giulia', 'marco', 'sara']).stato).toBe('approvata');
+    expect(esitoVoto({}, ['giulia'], ['giulia']).stato).toBe('approvata');
+  });
+
+  it('raccoglie chi ha proposto ogni parola', () => {
+    const chi = proponentiPerParola({ sara: ['NUOVA', 'ALTRA'], giulia: { 1: 'NUOVA' }, marco: undefined });
+    expect([...chi]).toEqual([
+      ['NUOVA', ['giulia', 'sara']],
+      ['ALTRA', ['sara']],
+    ]);
   });
 });
 

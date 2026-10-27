@@ -17,18 +17,25 @@ import {
 } from 'firebase/database';
 import { caricaDizionario } from '../dizionario.ts';
 import { accedi, database, oraServer, scartoOrologio } from '../firebase.ts';
+import { inSimboli, numeroLettere } from '../game/alfabeto.ts';
 import { preparaMano as generaMano, type Lato } from '../game/griglia.ts';
+import { punti } from '../game/punteggio.ts';
+import { trovaPercorso } from '../game/risolutore.ts';
 import { verificaParola, type Esito, type Proposta } from '../game/verifica.ts';
+import { aggiungiParola, paroleAggiunte } from '../paroleAggiunte.svelte.ts';
 import { eApp, piattaforma } from '../piattaforma.ts';
 import {
   calcolaRisultati,
   elencoCifrato,
+  esitoVoto,
   generaCodice,
   grigliaDaTesto,
   grigliaInTesto,
   impronta,
+  MAX_PROPOSTE,
   nomeLibero,
   nuovoHost,
+  proponentiPerParola,
   type RisultatiMano,
 } from './logica.ts';
 
@@ -51,6 +58,8 @@ export interface Impostazioni {
   automatico: boolean;
   /** Secondi di attesa prima della mano automatica (10–300, a passi di 10). */
   attesa: number;
+  /** A fine mano ognuno può far votare fino a due parole scartate: se tutti dicono sì, valgono. */
+  voto: boolean;
 }
 
 export interface Giocatore {
@@ -73,6 +82,7 @@ interface DatiMano {
   sale: number;
   impronte: string;
   minLettere: number;
+  voto?: boolean;
 }
 
 export interface ManoCorrente {
@@ -83,6 +93,7 @@ export interface ManoCorrente {
   minLettere: number;
   impronte: Set<string>;
   sale: number;
+  voto: boolean;
 }
 
 export interface RisultatiVisti {
@@ -90,6 +101,16 @@ export interface RisultatiVisti {
   dati: RisultatiMano | null;
   soluzioni: string[] | null;
   griglia: number[];
+  inizio: number;
+  minLettere: number;
+  /** Voto sulle parole scartate attivo in questa mano. */
+  voto: boolean;
+  /** Parole scartate che ogni giocatore ha messo ai voti. */
+  proposte: Record<string, string[]>;
+  /** Per ogni parola proposta, il voto di ogni giocatore. */
+  voti: Record<string, Record<string, boolean>>;
+  /** Parole già decise dall'host: vero se approvate. */
+  esiti: Record<string, boolean>;
 }
 
 export type Accesso = 'caricamento' | 'inesistente' | 'richiesta' | 'rifiutato' | 'bloccato' | 'dentro' | 'chiusa' | 'errore';
@@ -98,7 +119,14 @@ export type Fase = 'attesa' | 'conto' | 'gioco' | 'spettatore' | 'risultati' | '
 /** Tolleranza per le parole inviate negli ultimi istanti (deve stare sotto i 3 s delle regole). */
 const TOLLERANZA_MS = 2500;
 
-export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = { lato: 4, durata: 120, minLettere: 4, automatico: false, attesa: 60 };
+export const IMPOSTAZIONI_PREDEFINITE: Impostazioni = { lato: 4, durata: 120, minLettere: 4, automatico: false, attesa: 60, voto: false };
+
+/** Proposte lette dal database ({0: "PAROLA"} o ["PAROLA"]) → uid → parole. */
+function leggiProposte(valore: Record<string, Record<string, string> | string[] | null> | null): Record<string, string[]> {
+  return Object.fromEntries(
+    Object.entries(valore ?? {}).map(([uid, parole]) => [uid, Object.values(parole ?? {}).filter((p) => typeof p === 'string')]),
+  );
+}
 
 export class Stanza {
   readonly codice: string;
@@ -114,6 +142,8 @@ export class Stanza {
   mano: ManoCorrente | null = $state(null);
   risultati: RisultatiVisti | null = $state(null);
   mieParole: { parola: string; punti: number }[] = $state([]);
+  /** Parole della mano n scartate perché fuori dal dizionario: si possono mettere ai voti. */
+  scartate: { n: number; parole: string[] } = $state({ n: 0, parole: [] });
   adesso = $state(oraServer());
 
   private radice: DatabaseReference;
@@ -121,11 +151,12 @@ export class Stanza {
   private ascoltoGiocatori: Unsubscribe | null = null;
   private ascoltoRichieste: Unsubscribe | null = null;
   private ascoltoMano: Unsubscribe | null = null;
-  private ascoltoRisultati: Unsubscribe | null = null;
+  private ascoltiRisultati: Unsubscribe[] = [];
   private manoAscoltata = 0;
   private risultatiAscoltati = 0;
   private timer: ReturnType<typeof setInterval>;
   private lavorando = false;
+  private decidendo = false;
   private soluzioniPreparate = new Map<number, string[]>();
   private chiusa = false;
 
@@ -297,6 +328,7 @@ export class Stanza {
         minLettere: d.minLettere,
         sale: d.sale,
         impronte: new Set(d.impronte ? d.impronte.split(',') : []),
+        voto: d.voto === true,
       };
     });
     // Dopo una disconnessione si ritrovano le parole già inviate.
@@ -375,6 +407,10 @@ export class Stanza {
       void this.chiudiMano(m);
     }
 
+    // Voto sulle parole scartate: l'host lo chiude parola per parola, finché si vedono i risultati della mano.
+    const r = this.risultati;
+    if (this.eHost && r?.voto && r.dati && r.soluzioni && !this.decidendo) void this.decidiVoti(r, r.dati, r.soluzioni);
+
     // Nuovo host subentrato (o avanzamento automatico appena attivato) quando i risultati erano già scritti ma la mano successiva no.
     if (this.impostazioni.automatico && !this.meta.pausa && this.eHost && this.meta.stato === 'gioco' && m && this.meta.mano === m.n && manoFinita && !this.lavorando && this.risultati?.n === m.n && this.risultati.dati) {
       this.lavorando = true;
@@ -397,30 +433,51 @@ export class Stanza {
   private risultatiCaricati = false;
 
   private ascoltaRisultati(n: number) {
-    this.ascoltoRisultati?.();
-    this.ascoltoRisultati = null;
+    for (const stop of this.ascoltiRisultati) stop();
+    this.ascoltiRisultati = [];
     this.risultatiAscoltati = n;
     this.risultatiCaricati = false;
-    if (n <= 0 || !this.mano) {
+    const m = this.mano;
+    if (n <= 0 || !m) {
       this.risultati = null;
       return;
     }
-    const griglia = n === this.mano.n ? this.mano.griglia : [];
-    this.risultati = { n, dati: null, soluzioni: null, griglia };
-    if (n !== this.mano.n) {
-      get(this.figlio(`mani/${n}/griglia`))
+    const corrente = n === m.n;
+    this.risultati = {
+      n,
+      dati: null,
+      soluzioni: null,
+      griglia: corrente ? m.griglia : [],
+      inizio: corrente ? m.inizio : 0,
+      minLettere: corrente ? m.minLettere : 0,
+      voto: corrente && m.voto,
+      proposte: {},
+      voti: {},
+      esiti: {},
+    };
+    const aggiorna = (campi: Partial<RisultatiVisti>) => {
+      if (this.risultati?.n === n) this.risultati = { ...this.risultati, ...campi };
+    };
+    if (!corrente) {
+      get(this.figlio(`mani/${n}`))
         .then((s) => {
-          if (this.risultati?.n === n && s.exists()) this.risultati = { ...this.risultati, griglia: grigliaDaTesto(s.val()) };
+          const d: DatiMano | null = s.val();
+          if (d) aggiorna({ griglia: grigliaDaTesto(d.griglia), inizio: d.inizio, minLettere: d.minLettere, voto: d.voto === true });
         })
         .catch(() => {});
     }
-    this.ascoltoRisultati = onValue(
-      this.figlio(`risultati/${n}`),
-      (s) => {
-        this.risultatiCaricati = true;
-        if (this.risultati?.n === n) this.risultati = { ...this.risultati, dati: s.val() };
-      },
-      () => {},
+    this.ascoltiRisultati.push(
+      onValue(
+        this.figlio(`risultati/${n}`),
+        (s) => {
+          this.risultatiCaricati = true;
+          aggiorna({ dati: s.val() });
+        },
+        () => {},
+      ),
+      onValue(this.figlio(`proposte/${n}`), (s) => aggiorna({ proposte: leggiProposte(s.val()) }), () => {}),
+      onValue(this.figlio(`voti/${n}`), (s) => aggiorna({ voti: s.val() ?? {} }), () => {}),
+      onValue(this.figlio(`esiti/${n}`), (s) => aggiorna({ esiti: s.val() ?? {} }), () => {}),
     );
     void this.caricaSoluzioni(n);
   }
@@ -460,6 +517,50 @@ export class Stanza {
     }
   }
 
+  /**
+   * Solo host: chiude il voto sulle parole già decise. Quelle approvate (e davvero nella griglia)
+   * danno i punti a chi le ha proposte e restano nel dizionario aggiunto di questo dispositivo.
+   */
+  private async decidiVoti(r: RisultatiVisti, dati: RisultatiMano, soluzioni: string[]) {
+    const elettori = Object.entries(this.giocatori)
+      .filter(([, g]) => g.online && g.entrato <= r.inizio)
+      .map(([uid]) => uid);
+    const giaValide = new Set(soluzioni);
+    const puntiMano = { ...dati.punti };
+    const totali = { ...dati.totali };
+    const modifiche: Record<string, unknown> = {};
+    const approvate: string[] = [];
+    for (const [parola, proponenti] of proponentiPerParola(r.proposte)) {
+      if (parola in r.esiti) continue;
+      const { stato } = esitoVoto(r.voti[parola] ?? {}, proponenti, elettori);
+      if (stato === 'attesa') continue;
+      const s = inSimboli(parola);
+      const valida =
+        stato === 'approvata' && s !== null && numeroLettere(s) >= r.minLettere && !giaValide.has(parola) && trovaPercorso(s, r.griglia) !== null;
+      modifiche[`esiti/${r.n}/${parola}`] = valida;
+      if (!valida) continue;
+      const valore = punti(parola, numeroLettere(s));
+      for (const uid of proponenti) {
+        puntiMano[uid] = (puntiMano[uid] ?? 0) + valore;
+        totali[uid] = (totali[uid] ?? 0) + valore;
+        modifiche[`risultati/${r.n}/punti/${uid}`] = puntiMano[uid];
+        modifiche[`risultati/${r.n}/totali/${uid}`] = totali[uid];
+      }
+      modifiche[`risultati/${r.n}/trovate/${parola}`] = proponenti.join(' ');
+      approvate.push(parola);
+    }
+    if (Object.keys(modifiche).length === 0) return;
+    this.decidendo = true;
+    try {
+      await update(this.radice, modifiche);
+      for (const parola of approvate) aggiungiParola(parola);
+    } catch (e) {
+      console.error('Errore nel chiudere il voto', e);
+    } finally {
+      this.decidendo = false;
+    }
+  }
+
   /** Con giocatori in attesa ci si ferma: l'host li fa entrare e riparte con "Prossima mano". */
   private async proseguiAutomatico(m: ManoCorrente) {
     if (Object.keys(this.richieste).length > 0) await set(this.figlio('meta/pausa'), true);
@@ -469,7 +570,7 @@ export class Stanza {
   private async preparaMano(n: number, inizio: number) {
     const diz = await caricaDizionario();
     const imp = this.impostazioni;
-    const mano = generaMano(imp.lato, imp.minLettere, diz);
+    const mano = generaMano(imp.lato, imp.minLettere, diz, paroleAggiunte);
     const parole = mano.soluzioni.map((s) => s.parola);
     const sale = Math.floor(Math.random() * 2 ** 31);
     this.soluzioniPreparate.set(n, parole);
@@ -481,6 +582,7 @@ export class Stanza {
         sale,
         impronte: elencoCifrato(parole, sale),
         minLettere: imp.minLettere,
+        voto: imp.voto,
       },
       [`soluzioni/${n}`]: parole.join(' '),
       'meta/mano': n,
@@ -497,13 +599,36 @@ export class Stanza {
     if (!m) return { ok: false, motivo: 'griglia', parola: '' };
     const trovate = new Set(this.mieParole.map((t) => t.parola));
     const esito = await verificaParola(p, m.griglia, m.minLettere, trovate, (parola) => m.impronte.has(impronta(parola, m.sale)));
-    if (!esito.ok) return esito;
+    if (!esito.ok) {
+      if (esito.motivo === 'dizionario' && m.voto) this.scarta(m.n, esito.parola);
+      return esito;
+    }
     this.mieParole = [...this.mieParole, { parola: esito.parola, punti: esito.punti }];
     set(this.figlio(`parole/${m.n}/${this.uid}/${esito.parola}`), true).catch(() => {
       // Inviata fuori tempo: non conta.
       this.mieParole = this.mieParole.filter((t) => t.parola !== esito.parola);
     });
     return esito;
+  }
+
+  private scarta(n: number, parola: string) {
+    const parole = this.scartate.n === n ? this.scartate.parole : [];
+    if (!parole.includes(parola)) this.scartate = { n, parole: [...parole, parola] };
+  }
+
+  /** Mette ai voti una parola scartata nella mano di cui si vedono i risultati (al massimo due a testa). */
+  async proponiAlVoto(parola: string) {
+    const r = this.risultati;
+    if (!r?.voto) return;
+    const mie = r.proposte[this.uid] ?? [];
+    if (mie.includes(parola) || mie.length >= MAX_PROPOSTE) return;
+    await set(this.figlio(`proposte/${r.n}/${this.uid}/${mie.length}`), parola);
+  }
+
+  async vota(parola: string, si: boolean) {
+    const r = this.risultati;
+    if (!r?.voto) return;
+    await set(this.figlio(`voti/${r.n}/${parola}/${this.uid}`), si);
   }
 
   async segnala(parola: string) {
@@ -535,7 +660,7 @@ export class Stanza {
     this.ascoltoGiocatori?.();
     this.ascoltoRichieste?.();
     this.ascoltoMano?.();
-    this.ascoltoRisultati?.();
+    for (const stop of this.ascoltiRisultati) stop();
   }
 
   // ---------- Azioni dell'host ----------

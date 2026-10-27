@@ -32,6 +32,7 @@
           "minLettere": { ".validate": "newData.val() === 4 || newData.val() === 5 || newData.val() === 6" },
           "automatico": { ".validate": "newData.isBoolean()" },
           "attesa": { ".validate": "newData.isNumber() && newData.val() >= 10 && newData.val() <= 300 && newData.val() % 10 === 0" },
+          "voto": { ".validate": "newData.isBoolean()" },
           "$altro": { ".validate": false }
         },
 
@@ -115,7 +116,44 @@
           ".read": "auth != null && root.child('stanze').child($c).child('giocatori').child(auth.uid).exists()",
           "$n": {
             ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid && !data.exists()",
-            ".validate": "newData.hasChildren(['punti', 'totali'])"
+            ".validate": "newData.hasChildren(['punti', 'totali'])",
+            "punti": { ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid" },
+            "totali": { ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid" },
+            "trovate": { ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid" }
+          }
+        },
+
+        "proposte": {
+          "$n": {
+            ".read": "auth != null && root.child('stanze').child($c).child('giocatori').child(auth.uid).exists()",
+            "$uid": {
+              "$i": {
+                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('stanze').child($c).child('mani').child($n).child('voto').val() === true && root.child('stanze').child($c).child('giocatori').child($uid).child('entrato').val() <= root.child('stanze').child($c).child('mani').child($n).child('inizio').val() && now > root.child('stanze').child($c).child('mani').child($n).child('fine').val()",
+                ".validate": "($i === '0' || $i === '1') && newData.isString() && newData.val().matches(/^[A-Z]{3,30}$/)"
+              }
+            }
+          }
+        },
+
+        "voti": {
+          "$n": {
+            ".read": "auth != null && root.child('stanze').child($c).child('giocatori').child(auth.uid).exists()",
+            "$parola": {
+              "$uid": {
+                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('stanze').child($c).child('mani').child($n).child('voto').val() === true && root.child('stanze').child($c).child('giocatori').child($uid).child('entrato').val() <= root.child('stanze').child($c).child('mani').child($n).child('inizio').val() && now > root.child('stanze').child($c).child('mani').child($n).child('fine').val()",
+                ".validate": "newData.isBoolean() && $parola.matches(/^[A-Z]{3,30}$/)"
+              }
+            }
+          }
+        },
+
+        "esiti": {
+          "$n": {
+            ".read": "auth != null && root.child('stanze').child($c).child('giocatori').child(auth.uid).exists()",
+            "$parola": {
+              ".write": "auth != null && root.child('stanze').child($c).child('meta/host').val() === auth.uid && !data.exists()",
+              ".validate": "newData.isBoolean() && $parola.matches(/^[A-Z]{3,30}$/)"
+            }
           }
         },
 

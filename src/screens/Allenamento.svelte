@@ -4,6 +4,7 @@
   import { preparaMano, type Lato } from '../lib/game/griglia.ts';
   import type { Soluzione } from '../lib/game/risolutore.ts';
   import { verificaParola, type Proposta } from '../lib/game/verifica.ts';
+  import { paroleAggiunte } from '../lib/paroleAggiunte.svelte.ts';
   import ElencoParole, { type VoceParola } from '../components/ElencoParole.svelte';
   import Griglia from '../components/Griglia.svelte';
   import Icona from '../components/Icona.svelte';
@@ -32,7 +33,7 @@
     errore = '';
     try {
       const diz = await caricaDizionario();
-      const mano = preparaMano(lato, minLettere, diz);
+      const mano = preparaMano(lato, minLettere, diz, paroleAggiunte);
       griglia = mano.griglia;
       soluzioni = mano.soluzioni;
       perParola = new Map(mano.soluzioni.map((s) => [s.parola, s]));

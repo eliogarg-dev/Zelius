@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Ultimo aggiornamento: 2026-10-27.
+Ultimo aggiornamento: 2026-10-27 (voto sulle parole scartate).
 
 **Per riprendere con Claude:** apri la cartella del progetto in Claude Code e scrivi:
 "Leggi STATO-LAVORI.md, paroliere-design.md e brainstorming-paroliere.md e continuiamo l'implementazione."
@@ -21,7 +21,8 @@ Ultimo aggiornamento: 2026-10-27.
 - **Logica di gioco** (`src/lib/game/`): alfabeto con Qu come simbolo unico (vale 2 lettere), DAWG, risolutore, punteggio (ZELIUS = 10 in totale), griglie con al massimo 3 (4x4) o 4 (5x5) lettere uguali e al massimo un Qu.
 - **Interfaccia** (`src/screens/`, `src/components/`): stile moderno dei mockup, tema automatico/chiaro/scuro, griglia da trascinare con traccia, tastiera alternativa, effetto ZELIUS.
 - **Stanze** (`src/lib/stanza/`): creazione con codice di 4 caratteri, QR code e link, richieste approva/rifiuta/blocca, impostazioni, mani a oltranza con pausa di 45 s, parole controllate con elenco cifrato, risultati con tab Classifica/Parole, presenza online, passaggio dell'host al primo giocatore con l'app quando l'host esce. L'host interrompe la mano tenendo premuta la X per 2 s (con conferma): contano le parole già trovate, tutti vedono "Interrotta da …" e il gioco resta fermo finché l'host (anche uno nuovo) non preme "Riparti".
-- **Regole di sicurezza** (`database.rules.json`) con 20 test sull'emulatore.
+- **Voto sulle parole scartate** (impostazione della stanza "Parole scartate", spenta di base; vale dalla mano successiva, come le altre): a fine mano ognuno, host compreso, può mettere ai voti fino a 2 parole scartate perché fuori dal dizionario (le altre scartate non si offrono). Una parola vale se dicono sì tutti i giocatori della mano ancora online, tranne chi l'ha proposta; basta un no per scartarla. Si vota finché si vedono i risultati, cioè fino all'inizio della mano successiva: le parole ancora in attesa decadono. L'host controlla che la parola sia davvero nella griglia e abbastanza lunga, poi dà i punti a chi l'ha proposta (aggiornando `risultati/N`) e la salva nel dizionario aggiunto del suo telefono (`localStorage`, `src/lib/paroleAggiunte.svelte.ts`). Le parole aggiunte entrano nelle griglie che quel telefono prepara (stanze e allenamento) e si vedono, e si possono togliere, in Impostazioni → "Parole aggiunte". Database: `proposte/N/uid/{0,1}`, `voti/N/PAROLA/uid`, `esiti/N/PAROLA`.
+- **Regole di sicurezza** (`database.rules.json`) con 24 test sull'emulatore.
 - **App Android** (`android/`, `capacitor.config.json`, id `dev.eliogarg.zelius`): Capacitor 8, minSdk 26. Scanner QR in "Entra" (`@capacitor/barcode-scanner`, il codice si legge anche dal link), condivisione nativa (`@capacitor/share`: nella WebView `navigator.share` non c'è), tasto Indietro (dalla home chiude l'app, nella stanza non fa nulla, altrove torna alla home). Icona e splash generati da `assets/*.png` con `npx @capacitor/assets generate --android`.
 
 ## Firebase
@@ -63,9 +64,10 @@ Ultimo aggiornamento: 2026-10-27.
 | `npm run android` | Compila il sito e lo copia nel progetto Android |
 | `cd android; .\gradlew assembleDebug` | Crea l'APK di prova in `android/app/build/outputs/apk/debug/` (con `JAVA_HOME` sul Java di Android Studio); in alternativa `npx cap open android` e si compila da Android Studio |
 | App sul telefono con gli emulatori | `npm run emulatori`; `adb reverse tcp:9000 tcp:9000` e `adb reverse tcp:9099 tcp:9099`; compilare con `VITE_HOST_EMULATORE=127.0.0.1 npx vite build --mode emulatore`, poi `npx cap sync android` e `assembleDebug`. Solo la build di debug permette l'http verso 127.0.0.1 (`android/app/src/debug/`). Nella prova del 23/10 era attivo anche `"allowMixedContent": true` in `android/app/src/main/assets/capacitor.config.json` (file generato, si azzera a ogni sync): non verificato se serve |
-| `npm test` | Test della logica (35) |
-| `npm run test:regole` | Test delle regole di sicurezza sull'emulatore (20) |
+| `npm test` | Test della logica (40) |
+| `npm run test:regole` | Test delle regole di sicurezza sull'emulatore (24) |
 | `npm run check` | Controllo dei tipi |
 | `node e2e/prova-allenamento.ts` | Prova completa dell'allenamento (con `npm run dev` su porta 5173) |
 | `node e2e/prova-stanza.ts` | Prova completa di una stanza con 4 giocatori e cambio di host (con emulatori e `npx vite --mode emulatore --port 5174`); dura circa 3 minuti |
 | `node e2e/prova-interruzione.ts` | Prova dell'interruzione di una mano e del gioco fermo dopo il cambio di host (stesse condizioni della prova della stanza); dura circa 30 secondi |
+| `node e2e/prova-voto.ts` | Prova del voto sulle parole scartate con 3 giocatori: proposte, limite di 2, voti, punti e parole salvate dall'host (stesse condizioni); dura circa 20 secondi |
