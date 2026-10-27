@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Ultimo aggiornamento: 2026-10-23.
+Ultimo aggiornamento: 2026-10-27.
 
 **Per riprendere con Claude:** apri la cartella del progetto in Claude Code e scrivi:
 "Leggi STATO-LAVORI.md, paroliere-design.md e brainstorming-paroliere.md e continuiamo l'implementazione."
@@ -17,7 +17,7 @@ Ultimo aggiornamento: 2026-10-23.
 
 ## Cosa c'è
 
-- **Dizionario** (`public/dizionario.bin`, 236 KB): 380.641 parole da Morph-it!, senza nomi propri e senza forme verbali con pronomi attaccati, accenti tolti, più ZELIUS. Solo Morph-it per ora (Hunspell è GPL: rimandato).
+- **Dizionario Zelius** (`public/dizionario.bin`, 1,02 MB): 3.066.988 parole. Dalle fonti: Morph-it! (391.724), paroleitaliane di Napolux (207.044 in più; esclusa la lista da 660.000, piena di forme antiche o sbagliate), Wikizionario (157.255) e Wiktionary inglese (124.744, completa coniugazioni e flessioni). Generate da noi: 1.928.916 forme verbali con pronomi attaccati (mangiarlo, dammelo, lavandosi, laviamoci), 225.378 alterati (tavolino, tavolaccio, fuochino, grassotto: dai nomi di Morph-it e dagli aggettivi fino a 7 lettere, esclusi tronchi, già alterati e derivati da verbi), 31.698 avverbi in -mente e 228 gerundi/imperativi regolari mancanti. Senza nomi propri e cognomi, minimo 4 lettere, accenti tolti, più ZELIUS. A fine mano le parole non trovate si vedono 20 alla volta, dalle più ricche, con "Carica altre". Crediti in Impostazioni → "Licenze e fonti". Hunspell scartato (GPL), ListediParole.it scartato (non riutilizzabile).
 - **Logica di gioco** (`src/lib/game/`): alfabeto con Qu come simbolo unico (vale 2 lettere), DAWG, risolutore, punteggio (ZELIUS = 10 in totale), griglie con al massimo 3 (4x4) o 4 (5x5) lettere uguali e al massimo un Qu.
 - **Interfaccia** (`src/screens/`, `src/components/`): stile moderno dei mockup, tema automatico/chiaro/scuro, griglia da trascinare con traccia, tastiera alternativa, effetto ZELIUS.
 - **Stanze** (`src/lib/stanza/`): creazione con codice di 4 caratteri, QR code e link, richieste approva/rifiuta/blocca, impostazioni, mani a oltranza con pausa di 45 s, parole controllate con elenco cifrato, risultati con tab Classifica/Parole, presenza online, passaggio dell'host al primo giocatore con l'app quando l'host esce. L'host interrompe la mano tenendo premuta la X per 2 s (con conferma): contano le parole già trovate, tutti vedono "Interrotta da …" e il gioco resta fermo finché l'host (anche uno nuovo) non preme "Riparti".
@@ -63,7 +63,7 @@ Ultimo aggiornamento: 2026-10-23.
 | `npm run android` | Compila il sito e lo copia nel progetto Android |
 | `cd android; .\gradlew assembleDebug` | Crea l'APK di prova in `android/app/build/outputs/apk/debug/` (con `JAVA_HOME` sul Java di Android Studio); in alternativa `npx cap open android` e si compila da Android Studio |
 | App sul telefono con gli emulatori | `npm run emulatori`; `adb reverse tcp:9000 tcp:9000` e `adb reverse tcp:9099 tcp:9099`; compilare con `VITE_HOST_EMULATORE=127.0.0.1 npx vite build --mode emulatore`, poi `npx cap sync android` e `assembleDebug`. Solo la build di debug permette l'http verso 127.0.0.1 (`android/app/src/debug/`). Nella prova del 23/10 era attivo anche `"allowMixedContent": true` in `android/app/src/main/assets/capacitor.config.json` (file generato, si azzera a ogni sync): non verificato se serve |
-| `npm test` | Test della logica (32) |
+| `npm test` | Test della logica (35) |
 | `npm run test:regole` | Test delle regole di sicurezza sull'emulatore (20) |
 | `npm run check` | Controllo dei tipi |
 | `node e2e/prova-allenamento.ts` | Prova completa dell'allenamento (con `npm run dev` su porta 5173) |

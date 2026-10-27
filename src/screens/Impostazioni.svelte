@@ -46,13 +46,14 @@
     <p class="muted nota">Automatico segue il tema del telefono.</p>
   </div>
 
-  <div class="scheda crediti">
-    <div class="etichetta">Dizionario</div>
+  <details class="licenze muted">
+    <summary>Licenze e fonti</summary>
     <p>
-      Le parole vengono da <strong>Morph-it!</strong> di Marco Baroni ed Eros Zanchetta (Università di Bologna),
-      con licenza CC BY-SA 2.0 e LGPL.
+      Dizionario Zelius, licenza CC BY-SA 4.0. Costruito da: Morph-it! di M. Baroni ed E. Zanchetta
+      (Univ. di Bologna, CC BY-SA 2.0); Wikizionario e Wiktionary inglese (CC BY-SA); paroleitaliane di Napolux
+      (MIT; coniugazioni da verb-data, CC BY-SA 3.0).
     </p>
-  </div>
+  </details>
 </div>
 
 <style>
@@ -83,10 +84,16 @@
     margin: 8px 0 0;
   }
 
-  .crediti p {
-    margin: 0;
-    font-size: 14px;
+  .licenze {
+    font-size: 13px;
     line-height: 1.5;
-    color: var(--soft);
+  }
+
+  .licenze summary {
+    cursor: pointer;
+  }
+
+  .licenze p {
+    margin: 8px 0 0;
   }
 </style>

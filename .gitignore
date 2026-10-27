@@ -2,6 +2,7 @@ node_modules/
 dist/
 data/raw/
 data/parole.txt
+data/scarti.txt
 .firebase/
 *.log
 .DS_Store

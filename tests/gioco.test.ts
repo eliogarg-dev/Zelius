@@ -128,9 +128,34 @@ describe('dizionario vero', () => {
   const buffer = readFileSync(new URL('../public/dizionario.bin', import.meta.url));
   const diz = Dizionario.daBuffer(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength));
 
-  it('contiene parole comuni e ZELIUS, ma non nomi propri né pronomi attaccati', () => {
+  it('contiene parole comuni e ZELIUS, ma non nomi propri', () => {
     for (const p of ['casa', 'squadrone', 'citta', 'zelius', 'mangiavamo']) expect(diz.contiene(inSimboli(p)!), p).toBe(true);
-    for (const p of ['roma', 'andandosene', 'mangiarlo', 'dammi', 'zapp']) expect(diz.contiene(inSimboli(p)!), p).toBe(false);
+    for (const p of ['roma', 'zapp', 'heidegger']) expect(diz.contiene(inSimboli(p)!), p).toBe(false);
+  });
+
+  it('aggiunge le fonti nuove', () => {
+    // alveolare e altorilievo mancano in Morph-it; pivieri è anche un cognome, ma il Wikizionario lo dà come nome comune.
+    for (const p of ['alveolare', 'altorilievo', 'pivieri', 'evolversi']) expect(diz.contiene(inSimboli(p)!), p).toBe(true);
+  });
+
+  it('ha i verbi con i pronomi attaccati, anche di verbi che le fonti danno senza', () => {
+    const presenti = [
+      'mangiarlo', 'porlo', 'esserci', 'andandosene', 'attuffandosi', 'abbiamocela', 'accendetevi', 'laviamoci',
+      'dammelo', 'dillo', 'dagli', 'vattene', 'putandolo',
+    ];
+    for (const p of presenti) expect(diz.contiene(inSimboli(p)!), p).toBe(true);
+    // Il "si" non va all'imperativo, e dai/fai non prendono pronomi.
+    for (const p of ['lavasi', 'dailo']) expect(diz.contiene(inSimboli(p)!), p).toBe(false);
+  });
+
+  it('ha alterati e avverbi generati con le regole ortografiche', () => {
+    const presenti = [
+      'tavolino', 'tavolaccio', 'fuochino', 'fuocone', 'bacione', 'vocina', 'vociona', 'ragazzona', 'grassotto',
+      'rapidamente', 'facilmente', 'velocemente', 'velocissimamente',
+    ];
+    for (const p of presenti) expect(diz.contiene(inSimboli(p)!), p).toBe(true);
+    // Niente alterati di parole tronche, già alterate o derivate da verbi.
+    for (const p of ['assurditetto', 'tavolinetta', 'sfaldamentaccio']) expect(diz.contiene(inSimboli(p)!), p).toBe(false);
   });
 
   it('trova le parole della griglia dei mockup', () => {

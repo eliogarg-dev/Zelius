@@ -25,14 +25,30 @@
   } = $props();
 
   type Filtro = 'tutte' | 'mie' | 'mancate';
-  let filtro: Filtro = $state('tutte');
+  let filtro = $state<Filtro>('tutte');
 
   const filtri: [Filtro, string][] = [
     ['tutte', 'Tutte'],
     ['mie', 'Le mie'],
     ['mancate', 'Non trovate'],
   ];
-  const visibili = $derived(voci.filter((v) => (filtro === 'mie' ? v.mia : filtro === 'mancate' ? v.mancata : true)));
+  // Le parole non trovate possono essere centinaia: si mostrano le più ricche, una pagina alla volta.
+  const PAGINA = 20;
+  let mostrate = $state(PAGINA);
+  $effect.pre(() => {
+    void voci;
+    mostrate = PAGINA;
+  });
+
+  const mancate = $derived(
+    voci.filter((v) => v.mancata).sort((a, b) => b.punti - a.punti || a.parola.localeCompare(b.parola)),
+  );
+  const visibili = $derived(
+    filtro === 'mie'
+      ? voci.filter((v) => v.mia)
+      : [...(filtro === 'tutte' ? voci.filter((v) => !v.mancata) : []), ...mancate.slice(0, mostrate)],
+  );
+  const restanti = $derived(filtro === 'mie' ? 0 : Math.max(0, mancate.length - mostrate));
 </script>
 
 <div class="filtri">
@@ -65,6 +81,12 @@
     <li class="vuoto muted">Nessuna parola.</li>
   {/each}
 </ul>
+
+{#if restanti > 0}
+  <button type="button" class="btn-testo altre" onclick={() => (mostrate += PAGINA)}>
+    Carica altre <span class="muted">(ne restano {restanti})</span>
+  </button>
+{/if}
 
 <style>
   .filtri {
@@ -167,6 +189,11 @@
     color: var(--warm);
     font-weight: 700;
     font-size: 15px;
+  }
+
+  .altre {
+    display: block;
+    margin: 8px auto 0;
   }
 
   .vuoto {
