@@ -1,4 +1,10 @@
+<script module lang="ts">
+  // L'animazione di avvio si vede solo la prima volta che compare la Home.
+  let primaVolta = true;
+</script>
+
 <script lang="ts">
+  import Avvio from '../components/Avvio.svelte';
   import Icona from '../components/Icona.svelte';
 
   let {
@@ -16,22 +22,31 @@
     onimpostazioni: () => void;
     stanzeDisponibili: boolean;
   } = $props();
+
+  const conAvvio = primaVolta;
+  primaVolta = false;
+  let avvio = $state(conAvvio);
+  const lettereLogo: HTMLElement[] = [];
 </script>
 
-<div class="testa">
+{#if avvio}
+  <Avvio bersagli={() => lettereLogo} onfine={() => (avvio = false)} />
+{/if}
+
+<div class="testa" class:nascosto={avvio} class:compare={conAvvio && !avvio}>
   <button type="button" class="btn-icona" aria-label="Impostazioni" onclick={onimpostazioni}>
     <Icona nome="impostazioni" />
   </button>
 </div>
 
-<div class="logo" aria-label="Zelius" role="img">
+<div class="logo" class:nascosto={avvio} aria-label="Zelius" role="img">
   {#each [...'ZELIUS'] as l, i (i)}
-    <span class="display quadrata" style:--i={i}>{l}</span>
+    <span class="display quadrata" bind:this={lettereLogo[i]}>{l}</span>
   {/each}
 </div>
-<p class="sottotitolo muted">Il Paroliere da giocare insieme</p>
+<p class="sottotitolo muted" class:nascosto={avvio} class:compare={conAvvio && !avvio}>Il Paroliere da giocare insieme</p>
 
-<div class="azioni">
+<div class="azioni" class:nascosto={avvio} class:compare={conAvvio && !avvio}>
   {#if eApp}
     <button type="button" class="btn btn-primario" onclick={onallenati}>Allenati da solo</button>
     <button type="button" class="btn grande" onclick={oncrea} disabled={!stanzeDisponibili}>Crea una stanza</button>
@@ -60,6 +75,16 @@
     background: var(--surf);
     border: 1px solid var(--line);
     border-radius: 22px;
+    transition: background-color 300ms, border-color 300ms;
+  }
+
+  .logo.nascosto {
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  .logo.nascosto span {
+    visibility: hidden;
   }
 
   .logo span {
@@ -70,12 +95,19 @@
     align-items: center;
     justify-content: center;
     font-size: 30px;
-    animation: entra 500ms calc(var(--i) * 90ms) both ease-out;
   }
 
-  @keyframes entra {
+  .nascosto:not(.logo) {
+    opacity: 0;
+  }
+
+  .compare {
+    animation: compare 300ms ease-out;
+  }
+
+  @keyframes compare {
     from {
-      transform: translateY(16px) scale(0.8);
+      transform: translateY(8px);
       opacity: 0;
     }
   }
