@@ -39,13 +39,26 @@
     return -1;
   }
 
-  function inizia(e: PointerEvent) {
+  // Durante la mano la pagina non scorre e non si seleziona testo: il dito può partire ovunque.
+  $effect(() => {
     if (!attiva) return;
-    // Il trascinamento parte comunque: se il dito è fuori dal centro di una lettera,
-    // la prima lettera raggiunta muovendosi diventa l'inizio della parola.
+    const s = document.documentElement.style;
+    s.touchAction = 'none';
+    s.userSelect = s.webkitUserSelect = 'none';
+    return () => {
+      s.touchAction = s.userSelect = s.webkitUserSelect = '';
+    };
+  });
+
+  function inizia(e: PointerEvent) {
+    if (!attiva || e.button !== 0) return;
+    const t = e.target as Element;
+    if (t.closest('button, input, textarea, select, a, label')) return;
+    // Il trascinamento parte da qualsiasi punto dello schermo: se il dito non è sul centro
+    // di una lettera, la prima lettera raggiunta muovendosi diventa l'inizio della parola.
     const c = casellaSotto(e.clientX, e.clientY);
     trascinando = true;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    t.setPointerCapture(e.pointerId);
     percorso = c < 0 ? [] : [c];
   }
 
@@ -72,16 +85,9 @@
   }
 </script>
 
-<div
-  class="cornice"
-  class:attiva
-  role="img"
-  aria-label={`Griglia ${lato} per ${lato}: ${griglia.map(etichettaCasella).join(' ')}`}
-  onpointerdown={inizia}
-  onpointermove={muovi}
-  onpointerup={termina}
-  onpointercancel={termina}
->
+<svelte:window onpointerdown={inizia} onpointermove={muovi} onpointerup={termina} onpointercancel={termina} />
+
+<div class="cornice" role="img" aria-label={`Griglia ${lato} per ${lato}: ${griglia.map(etichettaCasella).join(' ')}`}>
   <div class="griglia" style:--lato={lato}>
     {#each griglia as simbolo, i (i)}
       <div class="casella display quadrata" class:scelta={mostrato.includes(i)} bind:this={caselle[i]}>
@@ -105,10 +111,6 @@
     border: 1px solid var(--line);
     user-select: none;
     -webkit-user-select: none;
-  }
-
-  .cornice.attiva {
-    touch-action: none;
   }
 
   /* Ogni casella occupa esattamente 1/lato della griglia (margini compresi),
