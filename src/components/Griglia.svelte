@@ -41,11 +41,12 @@
 
   function inizia(e: PointerEvent) {
     if (!attiva) return;
+    // Il trascinamento parte comunque: se il dito è fuori dal centro di una lettera,
+    // la prima lettera raggiunta muovendosi diventa l'inizio della parola.
     const c = casellaSotto(e.clientX, e.clientY);
-    if (c < 0) return;
     trascinando = true;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    percorso = [c];
+    percorso = c < 0 ? [] : [c];
   }
 
   function muovi(e: PointerEvent) {
@@ -53,7 +54,9 @@
     const c = casellaSotto(e.clientX, e.clientY);
     const ultima = percorso[percorso.length - 1];
     if (c < 0 || c === ultima) return;
-    if (percorso.length > 1 && c === percorso[percorso.length - 2]) {
+    if (percorso.length === 0) {
+      percorso = [c];
+    } else if (percorso.length > 1 && c === percorso[percorso.length - 2]) {
       percorso = percorso.slice(0, -1); // tornando indietro si cancella l'ultima lettera
     } else if (!percorso.includes(c) && vicini[ultima].includes(c)) {
       percorso = [...percorso, c];
